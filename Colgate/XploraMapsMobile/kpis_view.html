@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Cartilla General del Relevo</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Bootstrap -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+    <!-- Estilos propios -->
+    <link rel="stylesheet" href="kpis_view.css">
+</head>
+<body>
+
+<div class="container-kpis">
+    
+    <!-- Filtros -->
+    <div class="filters-section">
+        <h4 class="filters-title">
+            <i class="fa fa-filter"></i> Filtros de Busqueda
+        </h4>
+        
+        <form id="formFiltros">
+            <div class="row">
+                <div class="col-xs-6">
+                    <div class="form-group">
+                        <label for="f_inicio">Fecha Inicio</label>
+                        <input type="date" id="f_inicio" class="form-control">
+                    </div>
+                </div>
+                <div class="col-xs-6">
+                    <div class="form-group">
+                        <label for="f_fin">Fecha Fin</label>
+                        <input type="date" id="f_fin" class="form-control">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="form-group">
+                        <label for="select_gestor">Mercaderista</label>
+                        <select id="select_gestor" class="form-control">
+                            <option value="">-- Seleccione un mercaderista --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="button" id="btnBuscar" class="btn-buscar">
+                <i class="fa fa-search"></i> Buscar
+            </button>
+        </form>
+    </div>
+    
+    <!-- Resultados -->
+    <div class="results-section">
+        <div class="table-header">
+            <h4><i class="fa fa-list"></i> Puntos de Venta</h4>
+        </div>
+        
+        <div id="resultadosContainer">
+            <div class="loading-spinner" id="loadingSpinner" style="display:none;">
+                <i class="fa fa-spinner fa-spin"></i>
+                <p>Cargando datos...</p>
+            </div>
+            <div id="tablaContainer">
+                <div class="no-data">
+                    <i class="fa fa-info-circle"></i>
+                    <p>Seleccione un mercaderista y las fechas para ver los puntos de venta</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal KPIS -->
+<div class="modal fade modal-kpis" id="modalKPIS" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h5 class="modal-title">CARTILLA GENERAL DEL RELEVO DE PUNTO DE VENTA</h5>
+            </div>
+            <div class="modal-body" id="modalKPISBody">
+                <div class="text-center" style="padding: 40px;">
+                    <i class="fa fa-spinner fa-spin fa-3x"></i>
+                    <p>Cargando información de KPIs...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="kpis_view.js"></script>
+
+
+<script>
+$(document).ready(function() {
+    var urlParams = new URLSearchParams(window.location.search);
+    var debug = $('#debugContent');
+    debug.html('usuario: ' + urlParams.get('usuario'));
+});
+</script>
+
+</body>
+</html>

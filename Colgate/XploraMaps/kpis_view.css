@@ -1,0 +1,757 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    -webkit-overflow-scrolling: touch;
+    background: #f5f5f5;
+}
+
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    padding: 15px;
+}
+
+.container-kpis {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 10px;
+    overflow-x: hidden;
+}
+
+/* ========================================
+   FILTROS
+   ======================================== */
+.filters-section {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.filters-title {
+    color: #6a0dad;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.filters-section .form-group {
+    margin-bottom: 15px;
+}
+
+.filters-section label {
+    font-weight: 600;
+    color: #6a0dad;
+    font-size: 13px;
+}
+
+.filters-section .form-control {
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 10px 12px;
+    font-size: 14px;
+}
+
+.btn-buscar {
+    background: #6a0dad;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 30px;
+    font-weight: 600;
+    width: 100%;
+    margin-top: 10px;
+    transition: background 0.3s;
+}
+
+.btn-buscar:hover {
+    background: #7b1fa2;
+    color: white;
+}
+
+/* ========================================
+   RESULTADOS - CONTENEDOR PRINCIPAL
+   ======================================== */
+.results-section {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    max-width: 100%;
+}
+
+.results-section .table-header {
+    background: #6a0dad;
+    color: white;
+    padding: 12px 15px;
+    border-radius: 8px 8px 0 0;
+    margin: -15px -15px 15px -15px;
+}
+
+.results-section .table-header h4 {
+    margin: 0;
+    font-weight: 600;
+}
+
+#resultadosContainer {
+    overflow: hidden;
+    max-width: 100%;
+}
+
+/* ========================================
+   TABLA RESPONSIVE CON SCROLL HORIZONTAL
+   ======================================== */
+
+/* ✅ CONTENEDOR CON SCROLL - CLAVE PARA WEBVIEW */
+.table-responsive-wrapper {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch !important;
+    margin: 0 -5px;
+    padding: 0 5px;
+    width: 100%;
+    max-width: 100%;
+    display: block;
+    position: relative;
+    -webkit-transform: translateZ(0);
+    touch-action: pan-x pan-y;
+}
+
+/* ✅ LA TABLA CON ANCHO MÍNIMO */
+.table-kpis {
+    width: 100%;
+    min-width: 750px;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 0;
+    display: table;
+}
+
+/* ✅ ESTILOS DE CELDAS */
+.table-kpis thead th {
+    background: #f0f0f0;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #ddd;
+    white-space: nowrap;
+}
+
+.table-kpis tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+.table-kpis tbody tr:hover {
+    background: #f9f0ff;
+}
+
+/* ✅ COLUMNA # - FIJA */
+.table-kpis th:first-child,
+.table-kpis td:first-child {
+    width: 45px;
+    min-width: 45px;
+    max-width: 45px;
+    text-align: center;
+    font-weight: bold;
+    color: #666;
+}
+
+/* ✅ COLUMNA PUNTO DE VENTA - FLEXIBLE */
+.table-kpis th:nth-child(2),
+.table-kpis td:nth-child(2) {
+    min-width: 150px;
+    max-width: 250px;
+    white-space: normal;
+    word-wrap: break-word;
+    text-align: left;
+}
+
+/* ✅ COLUMNAS DE FECHA Y HORA */
+.table-kpis th:nth-child(3),
+.table-kpis td:nth-child(3),
+.table-kpis th:nth-child(4),
+.table-kpis td:nth-child(4),
+.table-kpis th:nth-child(5),
+.table-kpis td:nth-child(5) {
+    min-width: 100px;
+    white-space: nowrap;
+}
+
+/* ✅ COLUMNA ESTADO */
+.table-kpis th:nth-child(6),
+.table-kpis td:nth-child(6) {
+    min-width: 110px;
+    text-align: center;
+}
+
+/* ✅ COLUMNA ACCIÓN */
+.table-kpis th:nth-child(7),
+.table-kpis td:nth-child(7) {
+    min-width: 110px;
+    text-align: center;
+}
+
+/* ========================================
+   ESTADOS
+   ======================================== */
+.estado-badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.estado-atendido {
+    background: #27ae60;
+    color: white;
+}
+
+.estado-proceso {
+    background: #f39c12;
+    color: white;
+}
+
+.estado-novisitado {
+    background: #e74c3c;
+    color: white;
+}
+
+.estado-justificado {
+    background: #8e44ad;
+    color: white;
+}
+
+/* ========================================
+   BOTÓN VER KPIs
+   ======================================== */
+.btn-ver-kpis {
+    background: #6a0dad;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.3s;
+    white-space: nowrap;
+}
+
+.btn-ver-kpis:hover {
+    background: #7b1fa2;
+    color: white;
+}
+
+.btn-ver-kpis i {
+    margin-right: 4px;
+}
+
+/* ========================================
+   LOADING Y NO DATA
+   ======================================== */
+.loading-spinner {
+    text-align: center;
+    padding: 40px;
+}
+
+.loading-spinner .fa-spinner {
+    font-size: 40px;
+    color: #6a0dad;
+}
+
+.no-data {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+}
+
+.no-data .fa-info-circle {
+    font-size: 30px;
+    color: #ccc;
+    display: block;
+    margin-bottom: 10px;
+}
+
+/* ========================================
+   SCROLLBAR ESTILIZADA
+   ======================================== */
+.table-responsive-wrapper::-webkit-scrollbar {
+    height: 8px;
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.table-responsive-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.table-responsive-wrapper::-webkit-scrollbar-thumb {
+    background: #6a0dad;
+    border-radius: 4px;
+}
+
+.table-responsive-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #7b1fa2;
+}
+
+/* Firefox */
+.table-responsive-wrapper {
+    scrollbar-width: thin;
+    scrollbar-color: #6a0dad #f1f1f1;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+/* Tablets */
+@media (max-width: 992px) {
+    .table-kpis {
+        min-width: 680px;
+        font-size: 12px;
+    }
+    
+    .table-kpis th,
+    .table-kpis td {
+        padding: 8px 10px;
+    }
+}
+
+/* Móviles grandes */
+@media (max-width: 768px) {
+    .container-kpis {
+        padding: 0 5px;
+    }
+    
+    .results-section {
+        padding: 10px;
+    }
+    
+    .table-responsive-wrapper {
+        margin: 0 -3px;
+        padding: 0 3px;
+    }
+    
+    .table-kpis {
+        min-width: 600px;
+        font-size: 11px;
+    }
+    
+    .table-kpis th,
+    .table-kpis td {
+        padding: 6px 8px;
+    }
+    
+    .table-kpis th:nth-child(2),
+    .table-kpis td:nth-child(2) {
+        min-width: 120px;
+        max-width: 180px;
+    }
+    
+    .table-kpis th:nth-child(3),
+    .table-kpis td:nth-child(3),
+    .table-kpis th:nth-child(4),
+    .table-kpis td:nth-child(4),
+    .table-kpis th:nth-child(5),
+    .table-kpis td:nth-child(5) {
+        min-width: 80px;
+    }
+    
+    .btn-ver-kpis {
+        font-size: 10px;
+        padding: 4px 10px;
+    }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+    body {
+        padding: 8px;
+    }
+    
+    .container-kpis {
+        padding: 0 3px;
+    }
+    
+    .results-section {
+        padding: 8px 4px;
+    }
+    
+    .table-responsive-wrapper {
+        margin: 0 -2px;
+        padding: 0 2px;
+    }
+    
+    .table-kpis {
+        min-width: 520px;
+        font-size: 10px;
+    }
+    
+    .table-kpis th,
+    .table-kpis td {
+        padding: 5px 6px;
+    }
+    
+    .table-kpis th:first-child,
+    .table-kpis td:first-child {
+        width: 30px;
+        min-width: 30px;
+        max-width: 30px;
+        font-size: 9px;
+    }
+    
+    .table-kpis th:nth-child(2),
+    .table-kpis td:nth-child(2) {
+        min-width: 90px;
+        max-width: 130px;
+    }
+    
+    .table-kpis th:nth-child(3),
+    .table-kpis td:nth-child(3),
+    .table-kpis th:nth-child(4),
+    .table-kpis td:nth-child(4),
+    .table-kpis th:nth-child(5),
+    .table-kpis td:nth-child(5) {
+        min-width: 65px;
+        font-size: 9px;
+    }
+    
+    .table-kpis th:nth-child(6),
+    .table-kpis td:nth-child(6) {
+        min-width: 80px;
+    }
+    
+    .table-kpis th:nth-child(7),
+    .table-kpis td:nth-child(7) {
+        min-width: 80px;
+    }
+    
+    .btn-ver-kpis {
+        font-size: 9px;
+        padding: 3px 8px;
+    }
+    
+    .btn-ver-kpis i {
+        margin-right: 2px;
+    }
+    
+    .estado-badge {
+        font-size: 9px;
+        padding: 2px 8px;
+    }
+}
+
+/* ========================================
+   FIX PARA WEBVIEW ANDROID
+   ======================================== */
+.table-responsive-wrapper * {
+    -webkit-transform: translate3d(0,0,0);
+    transform: translate3d(0,0,0);
+}
+
+.table-responsive-wrapper {
+    touch-action: pan-x pan-y;
+}
+
+/* ========================================
+   MODAL KPIS
+   ======================================== */
+.modal-kpis .modal-dialog {
+    margin: 10px;
+    max-width: 95%;
+}
+
+.modal-kpis .modal-content {
+    border-radius: 12px;
+}
+
+.modal-kpis .modal-header {
+    background: #6a0dad;
+    color: white;
+    border-radius: 12px 12px 0 0;
+    padding: 15px 20px;
+}
+
+.modal-kpis .modal-header .close {
+    color: white;
+    opacity: 0.8;
+}
+
+.modal-kpis .modal-body {
+    padding: 20px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+@media (max-width: 480px) {
+    .modal-kpis .modal-dialog {
+        margin: 5px;
+        max-width: 98%;
+    }
+    
+    .modal-kpis .modal-body {
+        padding: 10px 5px;
+        max-height: 70vh;
+    }
+}
+
+/* ========================================
+   KPIS LAYOUT
+   ======================================== */
+.kpis-main-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .kpis-main-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.kpis-left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.pdv-title {
+    color: #6a0dad;
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.pdv-name {
+    font-size: 14px;
+    margin-top: 5px;
+    font-weight: normal;
+}
+
+.gestor-header {
+    background-color: #f0f0f0;
+    padding: 8px;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.fotos-container {
+    display: flex;
+    gap: 15px;
+}
+
+.foto-item {
+    flex: 1;
+}
+
+.foto-label {
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.foto-box {
+    height: 150px;
+    border: 2px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9f9f9;
+    padding: 5px;
+}
+
+.foto-img {
+    max-width: 100%;
+    max-height: 140px;
+    object-fit: contain;
+}
+
+.foto-placeholder {
+    color: #999;
+    font-style: italic;
+}
+
+.kpis-divider {
+    border: 2px solid #6a0dad;
+    margin: 20px 0;
+}
+
+/* KPIS TABLE (dentro del modal) */
+.kpis-table {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.kpis-table thead tr {
+    background: #6a0dad;
+    color: white;
+}
+
+.kpis-table th,
+.kpis-table td {
+    border: 1px solid #ddd;
+    padding: 8px 6px;
+    text-align: center;
+}
+
+.kpis-table td:first-child {
+    text-align: left;
+    font-weight: bold;
+}
+
+.check-box {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    background: #000;
+    color: #fff;
+    text-align: center;
+    line-height: 18px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.kpi-yes .check-box {
+    background: #000000;
+}
+
+.kpi-no .check-box {
+    background: #e74c3c;
+}
+
+.alert-info {
+    background: #d9edf7;
+    border-color: #bce8f1;
+    color: #31708f;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* ========================================
+   RE BADGE (NUEVO)
+   ======================================== */
+.re-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background: #6a0dad;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.re-badge.hipermercados { background: #e74c3c; }
+.re-badge.tiendas { background: #2ecc71; }
+.re-badge.autoservicios { background: #f39c12; }
+.re-badge.farmacias { background: #9b59b6; }
+.re-badge.default { background: #6a0dad; }
+
+/* Ajuste de columnas para incluir RE */
+.table-kpis {
+    min-width: 850px;
+}
+
+.table-kpis th:nth-child(3),
+.table-kpis td:nth-child(3) {
+    min-width: 100px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .table-kpis {
+        min-width: 700px;
+    }
+    
+    .table-kpis th:nth-child(3),
+    .table-kpis td:nth-child(3) {
+        min-width: 80px;
+    }
+    
+    .re-badge {
+        font-size: 8px;
+        padding: 2px 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .table-kpis {
+        min-width: 600px;
+    }
+    
+    .table-kpis th:nth-child(3),
+    .table-kpis td:nth-child(3) {
+        min-width: 65px;
+    }
+    
+    .re-badge {
+        font-size: 7px;
+        padding: 2px 6px;
+        border-radius: 8px;
+    }
+}
+
+
+/* ========================================
+   JERARQUÍA DE CATEGORÍAS EN KPIS
+   ======================================== */
+.categoria-padre td {
+    background: #f5f0ff !important;
+    border-bottom: 2px solid #6a0dad !important;
+    font-weight: bold;
+}
+
+.categoria-padre td:first-child {
+    font-size: 13px;
+    color: #4a0d7a;
+}
+
+.subcategoria-fila td {
+    background: #fafafa !important;
+}
+
+.subcategoria-fila td:first-child {
+    padding-left: 30px !important;
+    font-size: 11px;
+    color: #555;
+}
+
+.subcategoria-fila:hover td {
+    background: #f0f0f0 !important;
+}
+
+/* 📱 Responsive para móviles */
+@media (max-width: 480px) {
+    .categoria-padre td:first-child {
+        font-size: 11px;
+    }
+    
+    .subcategoria-fila td:first-child {
+        padding-left: 15px !important;
+        font-size: 10px;
+    }
+}

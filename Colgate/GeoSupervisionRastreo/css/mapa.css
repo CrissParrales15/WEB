@@ -1,0 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    /*Colores Lucky*/
+    --color-1: #dc2474;
+    --color-2: #04447c;
+    --color-3: #040404;
+    --color-4: #054b88;
+
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #397fa7;
+}
+
+
+
+.title {
+    color: #fff;
+    position: relative;
+    background: transparent;
+    padding: 6px 0px;
+    margin: 0;
+    box-shadow: 1px 0 3px rgba(0, 0, 0, 0.3);
+    font-size: 1.2rem;
+    line-height: 1;
+    text-align: center;
+    text-shadow: 1px 1px 0 rgb(0, 0, 0);
+    z-index: 500;
+}
+
+#map {
+    position: absolute;
+    top: 2em;
+    font-size: 1em;
+    bottom: 0;
+    width: 100%;
+}
+
+.form-group {
+    font-size: 14px;
+    width: 340px;
+    margin: 15px;
+    position: absolute;
+    z-index: 400;
+    top: 32px;
+    background: white;
+    border-radius: 12px;
+    color: #040404;
+    padding: 10px;
+    box-shadow: 0 3px 14px rgb(0 0 0 / 40%);
+
+}
+
+.btn-group {
+    z-index: 500;
+    margin-top: 12px;
+    border-style: none;
+    width: 50px;
+    float: right;
+    margin-right: 45px;
+}
+
+#btn_enfocar {
+    border-style: solid;
+    border-radius: 6px;
+    border-color: rgba(0, 0, 0, 0.2);
+    width: 40px;
+    height: 40px;
+
+}
+
+.form-select {
+    margin: 5px;
+}
+
+
+.number-icon {
+    background-image: url("./../icons/rastreo.png");
+    background-size: 28px 40px;
+    text-align: center;
+    color: rgb(255, 255, 255);
+    font-weight: bold;
+}

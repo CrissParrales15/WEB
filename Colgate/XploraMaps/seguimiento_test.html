@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguimiento</title>
+    <!--Cambiar esta sección | Inicio-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <!-- <script src="/App/XploraEcuador/assets/pluginsXploraMaps/Openmaps/ol.css"></script> -->
+     <link rel="stylesheet" href="/App/XploraEcuador/assets/pluginsXploraMaps/Openmaps/ol.css">
+    <script src="/App/XploraEcuador/assets/pluginsXploraMaps/Openmaps/ol.js"></script>
+    <script src="/App/XploraEcuador/assets/pluginsXploraMaps/Openmaps/olv4.js"></script>
+    <link rel="stylesheet" href="/App/XploraEcuador/assets/pluginsXploraMaps/animate.v3.5.0/css/animate.css">
+    <link href="/App/XploraEcuador/assets/pluginsXploraMaps/font-awesome.v4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="seguimiento_test.js"></script>
+    <link rel="stylesheet" href="seguimiento_v2.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,700,0,0" />
+    <!--Cambiar esta sección | Fin-->
+</head>
+
+<body id="div-body">
+    <div class="flex-container">
+
+        <div class="item_persona">
+            <div class="info_persona">
+                <div class="data_persona" id="data_nombre"> Nombre </div>
+            </div>
+        </div>
+        <div class="item">
+            <div class="image">
+                <span class="material-symbols-outlined">
+                    store
+                </span>
+            </div>
+            <div class="info">
+                <div class="data" id="data_pdv"> 1 </div>
+                <div class="description">POS ASIGNADOS</div>
+            </div>
+        </div>
+        <div class="item">
+            <div class="image">
+                <span class="material-symbols-outlined">
+                    handshake
+                </span>
+            </div>
+            <div class="info">
+                <div class="data" id="data_visitados"> 1 </div>
+                <div class="description">VISITADOS</div>
+            </div>
+        </div>
+        <div class="item">
+            <div class="image">
+                <span class="material-symbols-outlined">
+                    tools_wrench
+                </span>
+            </div>
+            <div class="info">
+                <div class="data" id="data_proceso"> 1 </div>
+                <div class="description">EN PROCESO</div>
+            </div>
+        </div>
+        <div class="item">
+            <div class="image">
+                <span class="material-symbols-outlined">
+                    close
+                </span>
+            </div>
+            <div class="info">
+                <div class="data" id="data_pendientes"> 1 </div>
+                <div class="description">PENDIENTES</div>
+            </div>
+        </div>
+        <div class="item">
+            <div class="image">
+                <span class="material-symbols-outlined">
+                    monitoring
+                </span>
+            </div>
+            <div class="info">
+                <div class="data" id="data_efectividad"> 1 </div>
+                <div class="description">EFECTIVIDAD</div>
+            </div>
+        </div>
+        <div class="item">
+            <div class="image">
+                <span class="material-symbols-outlined">
+                    supervisor_account
+                </span>
+            </div>
+            <div class="info">
+                <div class="data" id="data_supervisores"> 1 </div>
+                <div class="description">SUPERVISORES</div>
+            </div>
+        </div>
+        <div class="item">
+            <div class="image">
+                <span class="material-symbols-outlined">
+                    person_filled
+                </span>
+            </div>
+            <div class="info">
+                <div class="data" id="data_gestores"> 1 </div>
+                <div class="description">GESTORES</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-container-categoria">
+        <div class="item-categoria">
+            <div class="image-categoria">
+                <span class="dot" style="background-color: #FF2D00;"></span>
+            </div>
+            <div class="info-categorias">
+                <div class="description-categorias"> Menor a 50% </div>
+            </div>
+        </div>
+        <div class="item-categoria">
+            <div class="image-categoria">
+                <span class="dot" style="background-color: #F7FF00;"></span>
+            </div>
+            <div class="info-categorias">
+                <div class="description-categorias"> Mayor o igual a 50% </div>
+            </div>
+        </div>
+        <div class="item-categoria">
+            <div class="image-categoria">
+                <span class="dot" style="background-color: #4DFF00;"></span>
+            </div>
+            <div class="info-categorias">
+                <div class="description-categorias"> Mayor o igual a 85% </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
