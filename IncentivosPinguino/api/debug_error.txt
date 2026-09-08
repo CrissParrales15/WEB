@@ -1,0 +1,3 @@
+2026-07-29 12:31:09 - ERROR: Unknown column 'u.nombre' in 'field list' en el archivo DataSource.php (Linea: 36)
+2026-07-29 12:31:19 - ERROR: Unknown column 'u.nombre' in 'field list' en el archivo DataSource.php (Linea: 36)
+2026-07-29 12:31:30 - ERROR: Unknown column 'u.nombre' in 'field list' en el archivo DataSource.php (Linea: 36)
