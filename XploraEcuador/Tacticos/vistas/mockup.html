@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Quiebres y Restock</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f1f5f9;
+            color: #334155;
+        }
+        
+        .container { display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: #1e293b;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        
+        .logo {
+            padding: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            border-bottom: 1px solid #334155;
+            background: #0f172a;
+        }
+        
+        .nav-menu { flex: 1; padding: 20px 10px; overflow-y: auto; }
+        
+        .menu-item {
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #cbd5e1;
+            transition: all 0.2s;
+        }
+        
+        .menu-item:hover { background: #334155; color: white; }
+        .menu-item.active { background: #3b82f6; color: white; }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+        
+        .header {
+            background: white;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; /* Permite que el contenido del header se ajuste */
+        }
+        
+        .page-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 30px;
+        }
+
+        /* Filtros Unificados */
+        .filters-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border-left: 4px solid #cbd5e1;
+        }
+
+        .kpi-title { font-size: 13px; color: #64748b; font-weight: 600; }
+        .kpi-value { font-size: 28px; font-weight: 700; color: #1e293b; margin-top: 5px; }
+        
+        /* Jerarquía - Estilos de Acordeón (Mismos que antes) */
+        .gestor-card { background: white; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e2e8f0; }
+        .gestor-header { padding: 15px 20px; background: #f8fafc; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid transparent; transition: background 0.2s; }
+        .gestor-header:hover { background: #f1f5f9; }
+        .gestor-header.active { border-bottom-color: #e2e8f0; background: #eef2ff; }
+        .gestor-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 40px; height: 40px; background: #3b82f6; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        
+        .pdv-list { display: none; padding: 15px 20px; background: white; }
+        .pdv-list.show { display: block; }
+
+        .pdv-item { border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
+
+        .pdv-header { padding: 12px 15px; background: white; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #94a3b8; }
+        .pdv-header:hover { background: #f8fafc; }
+        
+        .producto-list { display: none; background: #f8fafc; padding: 10px; }
+        .producto-list.show { display: block; }
+
+        .producto-card {
+            background: white;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .producto-card:hover { transform: translateX(3px); border-color: #cbd5e1; }
+        
+        /* Badges e Indicadores (Mismos que antes) */
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .bg-red { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; }
+        .bg-orange { background: #ffedd5; color: #f97316; border: 1px solid #fed7aa; }
+        
+        /* Modal (Mismos que antes) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none; align-items: center; justify-content: center;
+            z-index: 1000;
+        }
+        .modal-container {
+            background: white; width: 600px; max-width: 95%;
+            border-radius: 12px; overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease;
+        }
+        
+        .modal-header { padding: 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 25px; max-height: 70vh; overflow-y: auto; }
+        
+        .detail-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .detail-group label { font-size: 12px; color: #64748b; display: block; }
+        .detail-group div { font-weight: 600; font-size: 14px; }
+
+        /* Dashboard Mejorado y Maximización */
+        .charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
+        .chart-box { 
+            background: white; padding: 20px; border-radius: 10px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+            position: relative;
+        }
+        
+        .chart-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .chart-action-btn {
+            background: #e2e8f0;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #475569;
+            transition: background 0.2s;
+        }
+
+        .chart-action-btn:hover { background: #cbd5e1; }
+
+        /* Estilo para maximizar */
+        .maximized-chart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .maximized-chart-content {
+            width: 90%;
+            height: 90%;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .hidden { display: none !important; }
+        .rotate-icon { transition: transform 0.3s; }
+        .rotate-down { transform: rotate(180deg); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="sidebar">
+        <div class="logo"><i class="fas fa-boxes"></i> TradeManager</div>
+        <div class="nav-menu">
+            <div class="menu-item active" onclick="switchTab('registros')">
+                <i class="fas fa-list-ul"></i> Registros de Campo
+            </div>
+            <div class="menu-item" onclick="switchTab('dashboard')">
+                <i class="fas fa-chart-line"></i> Dashboard Gerencial
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h2 id="page-title">Registros de Campo</h2>
+            <div style="font-size: 14px; color: #64748b;">
+                <i class="far fa-calendar-alt"></i> Hoy, <span id="currentDate"></span>
+            </div>
+        </div>
+
+        <div class="filters-panel" id="mainFilters">
+            <div class="filters-grid">
+                <div class="form-group">
+                    <label>Buscar</label>
+                    <input type="text" class="form-control" id="searchFilter" placeholder="Gestor, PDV o Producto..." onkeyup="applyFilters()">
+                </div>
+                <div class="form-group">
+                    <label>Tipo (Prioridad)</label>
+                    <select class="form-control" id="typeFilter" onchange="applyFilters()">
+                        <option value="">Todos</option>
+                        <option value="quiebre">Quiebre (Alta)</option>
+                        <option value="restock">Posible Quiebre (Media)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cadena</label>
+                    <select class="form-control" id="chainFilter" onchange="applyFilters()">
+                        <option value="">Todas</option>
+                        <option value="Supermaxi">Supermaxi</option>
+                        <option value="Mi Comisariato">Mi Comisariato</option>
+                        <option value="Tia">Tía</option>
+                        <option value="Santa Maria">Santa María</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Causal</label>
+                    <select class="form-control" id="causaFilter" onchange="applyFilters()">
+                        <option value="">Todas</option>
+                        <option value="No Pedido">No Pedido</option>
+                        <option value="Logistica">Retraso Logístico</option>
+                        <option value="Fantasma">Inventario Fantasma</option>
+                        <option value="Planograma">Error Planograma</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Región</label>
+                    <select class="form-control" id="regionFilter" onchange="applyFilters()">
+                        <option value="">Todas</option>
+                        <option value="Costa">Costa</option>
+                        <option value="Sierra">Sierra</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-registros" class="page-content">
+            <div class="kpi-grid">
+                <div class="kpi-card" style="border-left-color: #ef4444;">
+                    <div class="kpi-title">Quiebres Críticos (Alta)</div>
+                    <div class="kpi-value" id="kpi-quiebres">0</div>
+                </div>
+                <div class="kpi-card" style="border-left-color: #f97316;">
+                    <div class="kpi-title">Total SKUs Reportados</div>
+                    <div class="kpi-value" id="kpi-skus">0</div>
+                </div>
+                <div class="kpi-card" style="border-left-color: #3b82f6;">
+                    <div class="kpi-title">PDVs Visitados con Novedad</div>
+                    <div class="kpi-value" id="kpi-pdvs">0</div>
+                </div>
+            </div>
+
+            <div id="hierarchy-container">
+                </div>
+        </div>
+
+        <div id="tab-dashboard" class="page-content hidden">
+            <h3 style="margin-bottom: 20px; color: #1e293b;"><i class="fas fa-chart-bar"></i> Visión General de Incidencias</h3>
+            <div class="charts-container">
+                
+                <div class="chart-box">
+                    <div class="chart-actions">
+                        <button class="chart-action-btn" onclick="maximizeChart('chart1')"><i class="fas fa-expand"></i></button>
+                    </div>
+                    <h4 style="margin-bottom: 15px;">1. Desglose de SKUs por Prioridad</h4>
+                    <canvas id="chartType"></canvas>
+                </div>
+                
+                <div class="chart-box">
+                    <div class="chart-actions">
+                        <button class="chart-action-btn" onclick="maximizeChart('chart2')"><i class="fas fa-expand"></i></button>
+                    </div>
+                    <h4 style="margin-bottom: 15px;">2. Top 5 Causales de Quiebre</h4>
+                    <canvas id="chartCausal"></canvas>
+                </div>
+                
+                <div class="chart-box" style="grid-column: span 2;">
+                    <div class="chart-actions">
+                        <button class="chart-action-btn" onclick="maximizeChart('chart3')"><i class="fas fa-expand"></i></button>
+                    </div>
+                    <h4 style="margin-bottom: 15px;">3. Rendimiento de Incidencias por Cadena vs. Región</h4>
+                    <canvas id="chartChainRegion"></canvas>
+                </div>
+                
+                <div class="chart-box">
+                    <div class="chart-actions">
+                        <button class="chart-action-btn" onclick="maximizeChart('chart4')"><i class="fas fa-expand"></i></button>
+                    </div>
+                    <h4 style="margin-bottom: 15px;">4. Incidencias por Gestor (Top 3)</h4>
+                    <canvas id="chartGestor"></canvas>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="detailModal">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3 id="modal-product-name">Detalle del Producto</h3>
+            <button onclick="closeModal()" style="border:none; background:none; cursor:pointer; font-size: 18px;">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="detail-row">
+                <div class="detail-group">
+                    <label>Punto de Venta</label>
+                    <div id="modal-pdv"></div>
+                </div>
+                <div class="detail-group">
+                    <label>Cadena</label>
+                    <div id="modal-chain"></div>
+                </div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-group">
+                    <label>Tipo de Incidencia</label>
+                    <div id="modal-type"></div>
+                </div>
+                <div class="detail-group">
+                    <label>Causal Reportada</label>
+                    <div id="modal-causa"></div>
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-group">
+                    <label>Fecha y Hora</label>
+                    <div id="modal-date"></div>
+                </div>
+                <div class="detail-group">
+                    <label>Gestor</label>
+                    <div id="modal-gestor"></div>
+                </div>
+            </div>
+
+            <div class="detail-group" style="margin-bottom: 15px;">
+                <label>Comentario del Gestor</label>
+                <div style="background: #fffbeb; padding: 10px; border-radius: 6px; border: 1px solid #fde68a; margin-top: 5px;" id="modal-comment">
+                    Urgente reposición. Producto de alta rotación. Cliente solicitando producto.
+                </div>
+            </div>
+
+            <div class="detail-group">
+                <label>Evidencia Fotográfica</label>
+                <div style="background: #e2e8f0; height: 150px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #64748b; margin-top: 5px;">
+                    <i class="fas fa-camera"></i> &nbsp; [Foto del Quiebre en Percha]
+                </div>
+            </div>
+        </div>
+        <div style="padding: 15px 25px; background: #f8fafc; text-align: right; border-top: 1px solid #e2e8f0;">
+            <button onclick="closeModal()" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay hidden" id="maximizedModal" onclick="closeMaximizeModal(event)">
+    <div class="maximized-chart-content">
+        <button class="chart-action-btn" style="position: absolute; top: 10px; right: 10px; z-index: 2010;" onclick="closeMaximizeModal(event)"><i class="fas fa-compress"></i> Cerrar</button>
+        <h3 id="maximized-title" style="margin-bottom: 20px;"></h3>
+        <canvas id="maximizedChart"></canvas>
+    </div>
+</div>
+
+<script>
+    // 1. DATA GENERATION (Simulación de Base de Datos)
+    // Se elimina el campo 'estado' (pendiente/gestionado) de los datos de producto.
+    const rawData = [
+        {
+            id: 1,
+            name: "Juan Pérez",
+            region: "Costa",
+            pdvs: [
+                {
+                    name: "Supermaxi Mall del Sol",
+                    chain: "Supermaxi",
+                    products: [
+                        { name: "Coca Cola 2L", type: "quiebre", causa: "No Pedido", date: "2023-10-25 09:30" },
+                        { name: "Agua Dasani", type: "restock", causa: "Logistica", date: "2023-10-25 09:45" },
+                        { name: "Galletas Saltín", type: "quiebre", causa: "No Pedido", date: "2023-10-25 09:50" }
+                    ]
+                },
+                {
+                    name: "Mi Comisariato Riocentro",
+                    chain: "Mi Comisariato",
+                    products: [
+                        { name: "Galletas Oreo", type: "quiebre", causa: "Fantasma", date: "2023-10-25 11:20" }
+                    ]
+                }
+            ]
+        },
+        {
+            id: 2,
+            name: "Maria Gomez",
+            region: "Sierra",
+            pdvs: [
+                {
+                    name: "Santa Maria La Ofelia",
+                    chain: "Santa Maria",
+                    products: [
+                        { name: "Leche Tony", type: "quiebre", causa: "Planograma", date: "2023-10-25 08:15" },
+                        { name: "Jugo Valle", type: "restock", causa: "Logistica", date: "2023-10-25 08:30" },
+                        { name: "Fioravanti 1.5L", type: "quiebre", causa: "No Pedido", date: "2023-10-25 08:45" }
+                    ]
+                }
+            ]
+        },
+        {
+            id: 3,
+            name: "Carlos Ruiz",
+            region: "Costa",
+            pdvs: [
+                {
+                    name: "Tia Centro",
+                    chain: "Tia",
+                    products: [
+                        { name: "Coca Cola 2L", type: "quiebre", causa: "Logistica", date: "2023-10-25 14:00" },
+                        { name: "Manzana 1L", type: "restock", causa: "Logistica", date: "2023-10-25 14:05" }
+                    ]
+                }
+            ]
+        }
+    ];
+
+    let charts = {};
+    let globalFilteredData = []; // Almacenará los datos filtrados para ser usados en los gráficos
+
+    // 2. LOGIC & RENDERING
+    
+    function init() {
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('es-EC', { year: 'numeric', month: 'long', day: 'numeric' });
+        applyFilters(); // Render inicial
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.menu-item[onclick="switchTab('${tab}')"]`).classList.add('active');
+        
+        document.getElementById('tab-registros').classList.add('hidden');
+        document.getElementById('tab-dashboard').classList.add('hidden');
+        
+        document.getElementById(`tab-${tab}`).classList.remove('hidden');
+        document.getElementById('page-title').textContent = (tab === 'registros') ? 'Registros de Campo' : 'Dashboard Gerencial';
+
+        if(tab === 'dashboard') {
+            updateCharts(globalFilteredData);
+        }
+    }
+
+    // Toggle para Gestores
+    function toggleGestor(id) {
+        const content = document.getElementById(`gestor-content-${id}`);
+        const icon = document.getElementById(`gestor-icon-${id}`);
+        const header = document.getElementById(`gestor-header-${id}`);
+        
+        content.classList.toggle('show');
+        icon.classList.toggle('rotate-down');
+        header.classList.toggle('active');
+    }
+
+    // Toggle para PDVs
+    function togglePdv(id) {
+        const content = document.getElementById(`pdv-content-${id}`);
+        const icon = document.getElementById(`pdv-icon-${id}`);
+        
+        content.classList.toggle('show');
+        icon.classList.toggle('rotate-down');
+    }
+
+    // Modal
+    function openModal(productName, pdvName, chain, type, causa, gestorName, date) {
+        document.getElementById('modal-product-name').textContent = productName;
+        document.getElementById('modal-pdv').textContent = pdvName;
+        document.getElementById('modal-chain').textContent = chain;
+        document.getElementById('modal-gestor').textContent = gestorName;
+        document.getElementById('modal-date').textContent = date;
+        document.getElementById('modal-causa').textContent = causa;
+        
+        const typeEl = document.getElementById('modal-type');
+        typeEl.textContent = type === 'quiebre' ? 'Quiebre de Stock (Crítico)' : 'Posible Quiebre / Restock';
+        typeEl.style.color = type === 'quiebre' ? '#ef4444' : '#f97316';
+        
+        document.getElementById('detailModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('detailModal').style.display = 'none';
+    }
+
+    // FILTRADO Y RENDERIZADO PRINCIPAL
+    function applyFilters() {
+        const search = document.getElementById('searchFilter').value.toLowerCase();
+        const fType = document.getElementById('typeFilter').value;
+        const fChain = document.getElementById('chainFilter').value;
+        const fCausa = document.getElementById('causaFilter').value;
+        const fRegion = document.getElementById('regionFilter').value;
+
+        const container = document.getElementById('hierarchy-container');
+        container.innerHTML = '';
+
+        let totalQuiebres = 0;
+        let totalSkusReportados = 0;
+        let pdvSet = new Set();
+        globalFilteredData = []; // Resetear datos para gráficos
+
+        // Filtrado Jerárquico
+        rawData.forEach(gestor => {
+            if (fRegion && gestor.region !== fRegion) return;
+            
+            let visiblePdvs = [];
+
+            gestor.pdvs.forEach(pdv => {
+                if (fChain && pdv.chain !== fChain) return;
+
+                let visibleProducts = pdv.products.filter(prod => {
+                    if (fType && prod.type !== fType) return false;
+                    if (fCausa && prod.causa !== fCausa) return false;
+                    
+                    if (search) {
+                        const matchText = `${gestor.name} ${pdv.name} ${prod.name}`.toLowerCase();
+                        if (!matchText.includes(search)) return false;
+                    }
+                    return true;
+                });
+
+                if (visibleProducts.length > 0) {
+                    visiblePdvs.push({ ...pdv, products: visibleProducts });
+                    pdvSet.add(pdv.name);
+                    
+                    // Contar SKUs y Quiebres
+                    visibleProducts.forEach(p => {
+                        totalSkusReportados++;
+                        if(p.type === 'quiebre') totalQuiebres++;
+                        
+                        // Agregar al dataset global para gráficos
+                        globalFilteredData.push({
+                            type: p.type,
+                            causa: p.causa,
+                            chain: pdv.chain,
+                            region: gestor.region,
+                            gestor: gestor.name
+                        });
+                    });
+                }
+            });
+
+            if (visiblePdvs.length > 0) {
+                renderGestor(container, gestor, visiblePdvs);
+            }
+        });
+
+        // Actualizar KPIs
+        document.getElementById('kpi-quiebres').textContent = totalQuiebres;
+        document.getElementById('kpi-skus').textContent = totalSkusReportados;
+        document.getElementById('kpi-pdvs').textContent = pdvSet.size;
+        
+        // Si estamos en el dashboard, actualizar los gráficos
+        if (!document.getElementById('tab-dashboard').classList.contains('hidden')) {
+            updateCharts(globalFilteredData);
+        }
+    }
+
+    function renderGestor(container, gestor, pdvs) {
+        const gestorId = `g-${gestor.id}`;
+        
+        let html = `
+            <div class="gestor-card">
+                <div class="gestor-header" id="gestor-header-${gestorId}" onclick="toggleGestor('${gestorId}')">
+                    <div class="gestor-info">
+                        <div class="avatar">${gestor.name.charAt(0)}</div>
+                        <div>
+                            <div style="font-weight: bold; font-size: 15px;">${gestor.name}</div>
+                            <div style="font-size: 12px; color: #64748b;">${gestor.region} • ${pdvs.length} PDVs con incidencias</div>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down rotate-icon" id="gestor-icon-${gestorId}"></i>
+                </div>
+                <div class="pdv-list" id="gestor-content-${gestorId}">
+        `;
+
+        pdvs.forEach((pdv, index) => {
+            const pdvId = `${gestorId}-p-${index}`;
+            
+            // Contar Quiebres y Restock para el resumen del PDV
+            const quiebreCount = pdv.products.filter(p => p.type === 'quiebre').length;
+            const restockCount = pdv.products.filter(p => p.type === 'restock').length;
+
+            html += `
+                <div class="pdv-item">
+                    <div class="pdv-header" onclick="togglePdv('${pdvId}')" style="border-left-color: ${quiebreCount > 0 ? '#ef4444' : '#f97316'}">
+                        <div>
+                            <div style="font-weight: 600;">${pdv.name}</div>
+                            <div style="font-size: 12px; color: #64748b;">
+                                ${pdv.chain} • Quiebres: ${quiebreCount} | Restock Sugerido: ${restockCount}
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-down rotate-icon" id="pdv-icon-${pdvId}"></i>
+                    </div>
+                    <div class="producto-list" id="pdv-content-${pdvId}">
+            `;
+
+            pdv.products.forEach(prod => {
+                const badgeClass = prod.type === 'quiebre' ? 'bg-red' : 'bg-orange';
+                const badgeText = prod.type === 'quiebre' ? 'QUIEBRE (ALTA)' : 'RESTOCK (MEDIA)';
+                
+                html += `
+                    <div class="producto-card" onclick="openModal('${prod.name}', '${pdv.name}', '${pdv.chain}', '${prod.type}', '${prod.causa}', '${gestor.name}', '${prod.date}')">
+                        <div>
+                            <div style="font-weight: 600; font-size: 14px;">${prod.name}</div>
+                            <div style="font-size: 11px; color: #64748b; margin-top:2px;">
+                                <i class="fas fa-info-circle"></i> ${prod.causa} 
+                                <span style="margin-left: 10px;">Reportado: ${prod.date.split(' ')[0]}</span>
+                            </div>
+                        </div>
+                        <div class="badge ${badgeClass}">${badgeText}</div>
+                    </div>
+                `;
+            });
+
+            html += `</div></div>`; // Cierre PDV
+        });
+
+        html += `</div></div>`; // Cierre Gestor
+        container.insertAdjacentHTML('beforeend', html);
+    }
+
+    // 3. CHARTS (Reportería)
+    
+    // Función para procesar datos y crear datasets
+    function processChartData(data) {
+        const countsByType = data.reduce((acc, item) => {
+            acc[item.type] = (acc[item.type] || 0) + 1;
+            return acc;
+        }, {});
+        
+        const countsByCausal = data.filter(item => item.type === 'quiebre').reduce((acc, item) => {
+            acc[item.causa] = (acc[item.causa] || 0) + 1;
+            return acc;
+        }, {});
+        
+        const countsByChainRegion = data.reduce((acc, item) => {
+            const key = `${item.chain}-${item.region}`;
+            acc[key] = (acc[key] || 0) + 1;
+            return acc;
+        }, {});
+
+        const countsByGestor = data.reduce((acc, item) => {
+            acc[item.gestor] = (acc[item.gestor] || 0) + 1;
+            return acc;
+        }, {});
+        
+        return { countsByType, countsByCausal, countsByChainRegion, countsByGestor };
+    }
+
+    function updateCharts(data) {
+        const { countsByType, countsByCausal, countsByChainRegion, countsByGestor } = processChartData(data);
+        
+        // Destruir anteriores si existen
+        Object.values(charts).forEach(chart => chart.destroy());
+        charts = {};
+        
+        // --- 1. Desglose de SKUs por Prioridad (Pie) ---
+        const typeLabels = ['Quiebre (Alta)', 'Restock (Media)'];
+        const typeData = [countsByType['quiebre'] || 0, countsByType['restock'] || 0];
+        charts.type = new Chart(document.getElementById('chartType').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: typeLabels,
+                datasets: [{ data: typeData, backgroundColor: ['#ef4444', '#f97316'] }]
+            },
+            options: { plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // --- 2. Top 5 Causales de Quiebre (Barra Horizontal) ---
+        // Ordenar y tomar el top 5
+        const sortedCausals = Object.entries(countsByCausal).sort(([, a], [, b]) => b - a).slice(0, 5);
+        const causalLabels = sortedCausals.map(([label]) => label);
+        const causalData = sortedCausals.map(([, data]) => data);
+        charts.causal = new Chart(document.getElementById('chartCausal').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: causalLabels,
+                datasets: [{ label: 'SKUs Afectados', data: causalData, backgroundColor: '#3b82f6' }]
+            },
+            options: { 
+                indexAxis: 'y',
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
+        });
+        
+        // --- 3. Rendimiento de Incidencias por Cadena vs. Región (Barra Agrupada) ---
+        const chains = ['Supermaxi', 'Mi Comisariato', 'Tia', 'Santa Maria'];
+        const regions = ['Costa', 'Sierra'];
+        
+        const chainDatasets = regions.map((region, index) => ({
+            label: region,
+            data: chains.map(chain => countsByChainRegion[`${chain}-${region}`] || 0),
+            backgroundColor: index === 0 ? '#10b981' : '#f59e0b',
+        }));
+
+        charts.chainRegion = new Chart(document.getElementById('chartChainRegion').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: chains,
+                datasets: chainDatasets
+            },
+            options: {
+                responsive: true,
+                scales: { x: { stacked: true }, y: { stacked: true } }
+            }
+        });
+        
+        // --- 4. Incidencias por Gestor (Radar/Polar Area para Gerencia) ---
+        const sortedGestores = Object.entries(countsByGestor).sort(([, a], [, b]) => b - a).slice(0, 3);
+        const gestorLabels = sortedGestores.map(([label]) => label);
+        const gestorData = sortedGestores.map(([, data]) => data);
+        charts.gestor = new Chart(document.getElementById('chartGestor').getContext('2d'), {
+            type: 'polarArea',
+            data: {
+                labels: gestorLabels,
+                datasets: [{
+                    label: 'SKUs por Gestor',
+                    data: gestorData,
+                    backgroundColor: ['#ef4444', '#3b82f6', '#10b981']
+                }]
+            },
+            options: { plugins: { legend: { position: 'right' } } }
+        });
+        
+        // Guardar las instancias de chart para maximizar
+        window.chartInstances = {
+            chart1: charts.type,
+            chart2: charts.causal,
+            chart3: charts.chainRegion,
+            chart4: charts.gestor
+        };
+        
+        // Guardar los títulos para el modal de maximización
+        window.chartTitles = {
+            chart1: '1. Desglose de SKUs por Prioridad',
+            chart2: '2. Top 5 Causales de Quiebre',
+            chart3: '3. Rendimiento de Incidencias por Cadena vs. Región',
+            chart4: '4. Incidencias por Gestor (Top 3)'
+        };
+    }
+
+    // Funciones de Maximización
+    function maximizeChart(chartKey) {
+        if (!window.chartInstances || !window.chartInstances[chartKey]) return;
+
+        const originalChart = window.chartInstances[chartKey];
+        const originalContainer = originalChart.canvas.parentNode;
+        const maximizedCanvas = document.getElementById('maximizedChart');
+        const maximizedModal = document.getElementById('maximizedModal');
+        
+        // Mover el canvas original al modal
+        originalContainer.appendChild(maximizedCanvas);
+        
+        // Reemplazar el canvas original con un placeholder (para mantener el espacio)
+        const placeholder = document.createElement('canvas');
+        placeholder.id = originalChart.canvas.id;
+        originalContainer.appendChild(placeholder);
+        
+        // Actualizar el título y mostrar modal
+        document.getElementById('maximized-title').textContent = window.chartTitles[chartKey];
+        maximizedModal.classList.remove('hidden');
+
+        // Renderizar el gráfico con el contexto del modal
+        originalChart.canvas = maximizedCanvas;
+        originalChart.ctx = maximizedCanvas.getContext('2d');
+        originalChart.resize();
+
+        window.currentMaximizedChartKey = chartKey;
+    }
+
+    function closeMaximizeModal(event) {
+        if (event && event.target.id === 'maximizedModal') {
+             // Esto previene cerrar al hacer click en el contenido, solo en el overlay
+        } else if (event && event.target.classList.contains('chart-action-btn')) {
+            // Previene el cierre si se clickea el botón de cerrar.
+            event.stopPropagation();
+        }
+
+        const chartKey = window.currentMaximizedChartKey;
+        if (!chartKey) return;
+        
+        const originalChart = window.chartInstances[chartKey];
+        const maximizedModal = document.getElementById('maximizedModal');
+        const maximizedCanvas = document.getElementById('maximizedChart');
+        
+        // El placeholder es el canvas original vacío
+        const originalPlaceholder = document.getElementById(originalChart.canvas.id); 
+        
+        // Mover el canvas de vuelta a su posición original
+        originalPlaceholder.parentNode.replaceChild(maximizedCanvas, originalPlaceholder);
+        
+        // Volver a configurar el chart con su canvas original
+        originalChart.canvas = maximizedCanvas;
+        originalChart.ctx = maximizedCanvas.getContext('2d');
+        originalChart.resize();
+
+        // Ocultar modal
+        maximizedModal.classList.add('hidden');
+        window.currentMaximizedChartKey = null;
+    }
+
+    // Inicializar
+    init();
+
+</script>
+
+</body>
+</html>
