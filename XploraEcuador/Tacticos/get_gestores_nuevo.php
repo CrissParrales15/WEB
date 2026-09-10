@@ -26,8 +26,18 @@ header("Content-Type: application/json");
 
 try {
     $baseURL = "https://luckyecuadorweb.blob.core.windows.net/app/AppJaboneriaWilson/Inserts/";
-    $es_adicional = isset($_GET['es_adicional']) && $_GET['es_adicional'] === 'true';
+    $modo = isset($_GET['es_adicional']) ? strtolower(trim($_GET['es_adicional'])) : 'false';
+    $es_adicional = ($modo === 'true');
+    $es_todos = ($modo === 'todos');
     $fecha = isset($_GET['fecha']) ? $_GET['fecha'] : null;
+
+    if ($es_adicional) {
+        $condicion_tipo = "rpo.historico = 'Adicional'";
+    } elseif ($es_todos) {
+        $condicion_tipo = "1=1"; // TODOS: normales + adicionales
+    } else {
+        $condicion_tipo = "(rpo.historico != 'Adicional' OR rpo.historico IS NULL)";
+    }
 
     if ($fecha) {
         $fechaDMY = date('d/m/Y', strtotime($fecha));
@@ -63,7 +73,7 @@ try {
         WHERE $whereFecha
           AND ru.user NOT IN ('LUCKY UIO', 'LUCKY GYE', 'PRUEBA GYE')
           AND (
-              " . ($es_adicional ? "rpo.historico = 'Adicional'" : "(rpo.historico != 'Adicional' OR rpo.historico IS NULL)") . "
+              $condicion_tipo
               AND rpo.activar = 'SI'
           )
         ORDER BY 

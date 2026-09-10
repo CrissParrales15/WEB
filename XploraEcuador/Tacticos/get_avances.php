@@ -8,12 +8,23 @@ header('Content-Type: application/json');
 ob_clean();
 
 try {
-    $es_adicional = isset($_GET['es_adicional']) && $_GET['es_adicional'] === 'true';
+    $modo = isset($_GET['es_adicional']) ? strtolower(trim($_GET['es_adicional'])) : 'false';
+    $es_adicional = ($modo === 'true');
+    $es_todos = ($modo === 'todos');
     $mes = isset($_GET['mes']) ? intval($_GET['mes']) : date('n');
     $anio = isset($_GET['anio']) ? intval($_GET['anio']) : date('Y');
 
-    $condicion_observaciones = $es_adicional ? "LIKE '%Adicional%'" : "NOT LIKE '%Adicional%'";
-    $condicion_tipo_tactico = $es_adicional ? "= 'Adicional'" : "!= 'Adicional'";
+    if ($es_adicional) {
+        $condicion_observaciones = "LIKE '%Adicional%'";
+        $condicion_tipo_tactico  = "= 'Adicional'";
+    } elseif ($es_todos) {
+        // TODOS: no filtra por tipo (trae normales + adicionales)
+        $condicion_observaciones = "LIKE '%'";
+        $condicion_tipo_tactico  = "IS NOT NULL";
+    } else {
+        $condicion_observaciones = "NOT LIKE '%Adicional%'";
+        $condicion_tipo_tactico  = "!= 'Adicional'";
+    }
 
     function executeQuery($db, $query) {
         $result = $db->select($query);
@@ -95,38 +106,34 @@ try {
           ";
 
 
+    // Se agrupa SOLO por mercaderista: un mercaderista puede tener filas de
+    // distributivo bajo mas de un supervisor y agrupar por (supervisor, mercaderista)
+    // repetia su total en cada fila (doble conteo). El armado se toma de un
+    // subquery pre-agrupado por gestor (LEFT JOIN) para no repetirlo, y directo
+    // de validacion_tacticos -sin join a onpacks- para igualar el criterio de
+    // regional y ejecutivo. El supervisor mostrado es MIN() (determinista).
     $query_mercaderista = "
-        SELECT 
-            rd.supervisor,
+        SELECT
+            MIN(rd.supervisor) AS supervisor,
             rd.mercaderista,
             GROUP_CONCAT(DISTINCT rd.distribuidor SEPARATOR ' | ') AS distribuidor,
-            (
-                SELECT FLOOR(SUM(rd_sub.cantidad_asignada))
-                FROM repositorio_distributivo rd_sub
-                WHERE rd_sub.mercaderista = rd.mercaderista
-                    AND YEAR(rd_sub.fecha_asignacion) = $anio
-                    AND MONTH(rd_sub.fecha_asignacion) = $mes
-                    AND (rd_sub.observaciones IS NULL OR rd_sub.observaciones $condicion_observaciones)
-            ) AS cantidad_distribuida,
-            (
-                SELECT IFNULL(SUM(vt.cantidad_armada), 0)
-                FROM validacion_tacticos vt
-                JOIN repositorio_productos_onpacks rpo ON vt.tactico = rpo.sku
-                WHERE vt.gestor = rd.mercaderista
-                    AND anio_reporte = $anio
-                    AND mes_reporte = $mes
-                    AND tipo_tactico $condicion_tipo_tactico
-                    AND (rpo.sku NOT LIKE '%ADIC%' AND rpo.historico != 'Adicional')
-            ) AS cantidad_armada
-        FROM 
-            repositorio_distributivo rd
-        WHERE 
-            YEAR(rd.fecha_asignacion) = $anio
-            AND MONTH(rd.fecha_asignacion) = $mes
-            AND rd.mercaderista NOT IN ('LUCKY UIO', 'LUCKY GYE', 'PRUEBA GYE')
-            AND (rd.observaciones IS NULL OR rd.observaciones $condicion_observaciones)
-        GROUP BY 
-            rd.supervisor, rd.mercaderista;
+            SUM(rd.cantidad_asignada) AS cantidad_distribuida,
+            MAX(COALESCE(va.total_armado, 0)) AS cantidad_armada
+        FROM repositorio_distributivo rd
+        LEFT JOIN (
+            SELECT gestor, SUM(cantidad_armada) AS total_armado
+            FROM validacion_tacticos
+            WHERE mes_reporte = $mes
+              AND anio_reporte = $anio
+              AND tipo_tactico $condicion_tipo_tactico
+            GROUP BY gestor
+        ) va ON va.gestor = rd.mercaderista
+        WHERE YEAR(rd.fecha_asignacion) = $anio
+          AND MONTH(rd.fecha_asignacion) = $mes
+          AND rd.mercaderista NOT IN ('LUCKY UIO', 'LUCKY GYE', 'PRUEBA GYE')
+          AND (rd.observaciones IS NULL OR rd.observaciones $condicion_observaciones)
+        GROUP BY rd.mercaderista
+        ORDER BY MIN(rd.supervisor), rd.mercaderista;
     ";
 
     $data_regional = executeQuery($database, $query_regional);

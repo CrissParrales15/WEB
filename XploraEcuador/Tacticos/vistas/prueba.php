@@ -117,6 +117,7 @@ $currentDate = date("d-m-Y", strtotime("-1 day"));
     <div class="col-md-3">
         <label for="tipoTactico">Tipo de Táctico:</label>
         <select class="form-control" id="tipoTactico" onchange="cargarAvances()">
+            <option value="todos" selected>TODOS</option>
             <option value="false">Normales</option>
             <option value="true">Adicionales</option>
         </select>

@@ -19,16 +19,36 @@
     display: none;
 }
 
+/* Cada item: icono + texto en una fila, icono con ancho fijo
+   para que la posición no cambie entre estados */
+#sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    white-space: nowrap;
+}
+
+#sidebar .nav-link i {
+    flex: 0 0 1.5rem;
+    font-size: 1.1rem;
+    text-align: center;
+    line-height: 1;
+}
+
 #sidebar .nav-link span {
-    display: inline;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.2s ease;
+}
+
+/* Colapsado: se centra el icono y el texto sale del flujo (no deja hueco) */
+#sidebar.collapsed .nav-link {
+    justify-content: center;
+    gap: 0;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 #sidebar.collapsed .nav-link span {
-    opacity: 0;
-    width: 0;
-    overflow: hidden;
-    display: inline-block;
+    display: none;
 }
 
 .main-content {
@@ -39,6 +59,3 @@
 .main-content.collapsed {
     margin-left: 80px;
 }
-
-
-

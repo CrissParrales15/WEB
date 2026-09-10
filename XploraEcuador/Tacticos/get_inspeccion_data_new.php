@@ -9,14 +9,20 @@ $conn = $database->getConnection();
 header("Content-Type: application/json");
 
 try {
-    $esAdicional = isset($_GET['es_adicional']) && $_GET['es_adicional'] === 'true';
+    $modo = isset($_GET['es_adicional']) ? strtolower(trim($_GET['es_adicional'])) : 'false';
+    $esAdicional = ($modo === 'true');
+    $esTodos = ($modo === 'todos');
     $currentMonth = date("Y-m");
     $currentMonthNumber = date("n");
 
 
-    $whereTipo = $esAdicional
-        ? "AND rpo.historico = 'Adicional'"
-        : "AND (rpo.historico IS NULL OR rpo.historico <> 'Adicional')";
+    if ($esAdicional) {
+        $whereTipo = "AND rpo.historico = 'Adicional'";
+    } elseif ($esTodos) {
+        $whereTipo = ""; // TODOS: normales + adicionales
+    } else {
+        $whereTipo = "AND (rpo.historico IS NULL OR rpo.historico <> 'Adicional')";
+    }
 
 
     $queryCorregidos = "
