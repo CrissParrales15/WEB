@@ -1,0 +1,372 @@
+/*
+    DEMO STYLE
+*/
+@import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
+
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #fafafa;
+}
+
+p {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1em;
+    font-weight: 300;
+    line-height: 1.7em;
+    color: #999;
+}
+
+a,
+a:hover,
+a:focus {
+    color: inherit;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.navbar {
+    padding: 15px 10px;
+    background: #fff;
+    border: none;
+    border-radius: 0;
+    margin-bottom: 40px;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-btn {
+    box-shadow: none;
+    outline: none !important;
+    border: none;
+}
+
+.line {
+    width: 100%;
+    height: 1px;
+    border-bottom: 1px dashed #ddd;
+    margin: 40px 0;
+}
+
+/* ---------------------------------------------------
+    SIDEBAR STYLE
+----------------------------------------------------- */
+.wrapper {
+    display: flex;
+    align-items: stretch;
+}
+
+#sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    background: #7386D5;
+    color: #fff;
+    transition: all 0.3s;
+}
+
+#sidebar.active {
+    margin-left: -250px;
+}
+
+#sidebar .sidebar-header {
+    padding: 20px;
+    background: #6d7fcc;
+}
+
+#sidebar ul.components {
+    padding: 20px 0;
+    border-bottom: 1px solid #47748b;
+}
+
+#sidebar ul p {
+    color: #fff;
+    padding: 10px;
+}
+
+#sidebar ul li a {
+    padding: 10px;
+    font-size: 1.1em;
+    display: block;
+}
+
+#sidebar ul li a:hover {
+    color: #7386D5;
+    background: #fff;
+}
+
+#sidebar ul li.active>a,
+a[aria-expanded="true"] {
+    color: #fff;
+    background: #6d7fcc;
+}
+
+
+a[data-toggle="collapse"] {
+    position: relative;
+}
+
+a[aria-expanded="false"]::before,
+a[aria-expanded="true"]::before {
+    content: '\e259';
+    display: block;
+    position: absolute;
+    right: 20px;
+    font-family: 'Glyphicons Halflings';
+    font-size: 0.6em;
+}
+
+a[aria-expanded="true"]::before {
+    content: '\e260';
+}
+
+
+ul ul a {
+    font-size: 0.9em !important;
+    padding-left: 30px !important;
+    /* background: #6d7fcc; */
+}
+
+ul.CTAs {
+    padding: 20px;
+}
+
+ul.CTAs a {
+    text-align: center;
+    font-size: 0.9em !important;
+    display: block;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+a.download {
+    background: #fff;
+    color: #7386D5;
+}
+
+a.article,
+a.article:hover {
+    background: #6d7fcc !important;
+    color: #fff !important;
+}
+
+
+
+/* ---------------------------------------------------
+    CONTENT STYLE
+----------------------------------------------------- */
+#content {
+    padding: 20px;
+    min-height: 100vh;
+    transition: all 0.3s;
+}
+
+/* ---------------------------------------------------
+    MEDIAQUERIES
+----------------------------------------------------- */
+@media (max-width: 768px) {
+    #sidebar {
+        margin-left: -250px;
+    }
+
+    #sidebar.active {
+        margin-left: 0;
+    }
+
+    #sidebarCollapse span {
+        display: none;
+    }
+}
+
+/* CSS used here will be applied after bootstrap.css */
+
+/*.dropdown {
+    display: inline-block;
+    margin-left: 20px;
+    padding: 10px;
+}
+
+.glyphicon-bell {
+    font-size: 1.5rem;
+}
+
+.notifications {
+    min-width: 420px;
+}
+
+.notifications-wrapper {
+    overflow: auto;
+    max-height: 250px;
+}
+
+.menu-title {
+    color: #ff7788;
+    font-size: 1.5rem;
+    display: inline-block;
+}
+
+.glyphicon-circle-arrow-right {
+    margin-left: 10px;
+}
+
+
+.notification-heading,
+.notification-footer {
+    padding: 2px 10px;
+}
+
+
+.dropdown-menu.divider {
+    margin: 5px 0;
+}
+
+.item-title {
+    font-size: 1.3rem;
+    color: #000;
+}
+
+.notifications a.content {
+    text-decoration: none;
+    background: #ccc;
+}
+
+.notification-item {
+    padding: 10px;
+    margin: 5px;
+    background: #ccc;
+    border-radius: 4px;
+}*/
+
+.navbar-nav .dropdown-menu.notify-drop {
+    min-width: 330px;
+    background-color: #fff;
+    min-height: 360px;
+    max-height: 360px;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .notify-drop-title {
+    border-bottom: 1px solid #e2e2e2;
+    padding: 5px 15px 10px 15px;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .drop-content {
+    min-height: 280px;
+    max-height: 280px;
+    overflow-y: scroll;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .drop-content::-webkit-scrollbar-track {
+    background-color: #F5F5F5;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .drop-content::-webkit-scrollbar {
+    width: 8px;
+    background-color: #F5F5F5;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .drop-content::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .drop-content>li {
+    border-bottom: 1px solid #e2e2e2;
+    padding: 10px 0px 5px 0px;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .drop-content>li:nth-child(2n+0) {
+    background-color: #fafafa;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .drop-content>li:after {
+    content: "";
+    clear: both;
+    display: block;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .drop-content>li:hover {
+    background-color: #fcfcfc;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .drop-content>li:last-child {
+    border-bottom: none;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .drop-content>li .notify-img {
+    float: left;
+    display: inline-block;
+    width: 45px;
+    height: 45px;
+    margin: 0px 0px 8px 0px;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .allRead {
+    margin-right: 7px;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .rIcon {
+    float: right;
+    color: #999;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .rIcon:hover {
+    color: #333;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .drop-content>li a {
+    font-size: 12px;
+    font-weight: normal;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .drop-content>li {
+    font-weight: bold;
+    font-size: 11px;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .drop-content>li hr {
+    margin: 5px 0;
+    width: 70%;
+    border-color: #e2e2e2;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .drop-content .pd-l0 {
+    padding-left: 0;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .drop-content>li p {
+    font-size: 11px;
+    color: #666;
+    font-weight: normal;
+    margin: 3px 0;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .drop-content>li p.time {
+    font-size: 10px;
+    font-weight: 600;
+    top: -6px;
+    margin: 8px 0px 0px 0px;
+    padding: 0px 3px;
+    border: 1px solid #e2e2e2;
+    position: relative;
+    background-image: linear-gradient(#fff, #f2f2f2);
+    display: inline-block;
+    border-radius: 2px;
+    color: #B97745;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .drop-content>li p.time:hover {
+    background-image: linear-gradient(#fff, #fff);
+}
+
+.navbar-nav .dropdown-menu.notify-drop .notify-drop-footer {
+    border-top: 1px solid #e2e2e2;
+    bottom: 0;
+    position: relative;
+    padding: 8px 15px;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .notify-drop-footer a {
+    color: #777;
+    text-decoration: none;
+}
+
+.navbar-nav .dropdown-menu.notify-drop .notify-drop-footer a:hover {
+    color: #333;
+}

@@ -1,0 +1,352 @@
+Datos recibidos: Array
+(
+    [receptor] => DENNISE GUANOTUNA
+    [donantes] => Array
+        (
+            [0] => ANDRES CHAMBA
+        )
+
+    [intercambios] => Array
+        (
+            [0] => Array
+                (
+                    [tactico] => BOTELLA (NOVIEMBRE)
+                    [cantidad] => 100
+                )
+
+        )
+
+)
+Datos recibidos: Array
+(
+    [receptor] => DENNISE GUANOTUNA
+    [donantes] => Array
+        (
+            [0] => GERARDO PIRAY
+        )
+
+    [intercambios] => Array
+        (
+            [0] => Array
+                (
+                    [tactico] => BOTELLA (NOVIEMBRE)
+                    [cantidad] => 50
+                )
+
+        )
+
+)
+Datos recibidos: Array
+(
+    [receptor] => DENNISE GUANOTUNA
+    [donantes] => Array
+        (
+            [0] => GERARDO PIRAY
+        )
+
+    [intercambios] => Array
+        (
+            [0] => Array
+                (
+                    [tactico] => BOTELLA (NOVIEMBRE)
+                    [cantidad] => 50
+                )
+
+        )
+
+)
+Datos recibidos: Array
+(
+    [receptor] => DENNISE GUANOTUNA
+    [donantes] => Array
+        (
+            [0] => GERARDO PIRAY
+        )
+
+    [intercambios] => Array
+        (
+            [0] => Array
+                (
+                    [tactico] => BOTELLA (NOVIEMBRE)
+                    [cantidad] => 50
+                )
+
+        )
+
+)
+Datos recibidos: Array
+(
+    [receptor] => DENNISE GUANOTUNA
+    [donantes] => Array
+        (
+            [0] => GERARDO PIRAY
+        )
+
+    [intercambios] => Array
+        (
+            [0] => Array
+                (
+                    [tactico] => BOTELLA (NOVIEMBRE)
+                    [cantidad] => 50
+                )
+
+        )
+
+)
+Datos recibidos: Array
+(
+    [receptor] => DENNISE GUANOTUNA
+    [donantes] => Array
+        (
+            [0] => GERARDO PIRAY
+        )
+
+    [intercambios] => Array
+        (
+            [0] => Array
+                (
+                    [tactico] => BOTELLA (NOVIEMBRE)
+                    [cantidad] => 50
+                )
+
+        )
+
+)
+Datos recibidos: Array
+(
+    [receptor] => DENNISE GUANOTUNA
+    [donantes] => Array
+        (
+            [0] => FRANCISCA GUZMAN
+        )
+
+    [intercambios] => Array
+        (
+            [0] => Array
+                (
+                    [tactico] => BOTELLA (NOVIEMBRE)
+                    [cantidad] => 50
+                )
+
+        )
+
+)
+Datos recibidos: Array
+(
+    [receptor] => DENNISE GUANOTUNA
+    [donantes] => Array
+        (
+            [0] => LUIS CABRERA
+        )
+
+    [intercambios] => Array
+        (
+            [0] => Array
+                (
+                    [tactico] => BOTELLA (NOVIEMBRE)
+                    [cantidad] => 100
+                )
+
+        )
+
+)
+Datos recibidos: Array
+(
+    [receptor] => DENNISE GUANOTUNA
+    [donantes] => Array
+        (
+            [0] => LUIS CABRERA
+        )
+
+    [intercambios] => Array
+        (
+            [0] => Array
+                (
+                    [tactico] => BOTELLA (NOVIEMBRE)
+                    [cantidad] => 50
+                )
+
+        )
+
+)
+Datos recibidos: Array
+(
+    [receptor] => LUIS CABRERA
+    [donantes] => Array
+        (
+            [0] => FRANCISCA GUZMAN
+        )
+
+    [intercambios] => Array
+        (
+            [0] => Array
+                (
+                    [tactico] => BOTELLA (NOVIEMBRE)
+                    [cantidad] => 50
+                )
+
+        )
+
+)
+Datos recibidos: Array
+(
+    [receptor] => LUIS CABRERA
+    [donantes] => Array
+        (
+            [0] => AMPARO LOACHAMIN
+        )
+
+    [intercambios] => Array
+        (
+            [0] => Array
+                (
+                    [tactico] => Estrategia A
+                    [cantidad] => 100
+                )
+
+        )
+
+)
+Datos recibidos: Array
+(
+    [receptor] => GERARDO PIRAY
+    [donantes] => Array
+        (
+            [0] => ALISSON MACIAS
+        )
+
+    [intercambios] => Array
+        (
+            [0] => Array
+                (
+                    [tactico] => DETERGENTE POLVO GOL 70 GR (DICIEMBRE)
+                    [cantidad] => 7
+                )
+
+        )
+
+)
+Datos recibidos: Array
+(
+    [receptor] => CAROLINA AVILA
+    [donantes] => Array
+        (
+            [0] => YURI CONTENTO
+        )
+
+    [intercambios] => Array
+        (
+            [0] => Array
+                (
+                    [tactico] => DETERGENTE POLVO GOL 70 GR (DICIEMBRE)
+                    [cantidad] => 1000
+                )
+
+        )
+
+)
+Datos recibidos: Array
+(
+    [receptor] => GERARDO PIRAY
+    [donantes] => Array
+        (
+            [0] => LUIS CABRERA
+        )
+
+    [intercambios] => Array
+        (
+            [0] => Array
+                (
+                    [tactico] => DETERGENTE POLVO GOL 70 GR (DICIEMBRE)
+                    [cantidad] => 1
+                )
+
+            [1] => Array
+                (
+                    [tactico] => LAVA DISCO 150 GR (DICIEMBRE)
+                    [cantidad] => 1
+                )
+
+            [2] => Array
+                (
+                    [tactico] => LAVA 115GR (DICIEMBRE)
+                    [cantidad] => 1
+                )
+
+            [3] => Array
+                (
+                    [tactico] => ESPONJAS (DICIEMBRE)
+                    [cantidad] => 1
+                )
+
+            [4] => Array
+                (
+                    [tactico] => Pinzas (DICIEMBRE)
+                    [cantidad] => 1
+                )
+
+        )
+
+)
+Datos recibidos: Array
+(
+    [receptor] => GERARDO PIRAY
+    [donantes] => Array
+        (
+            [0] => LUIS CABRERA
+        )
+
+    [intercambios] => Array
+        (
+            [0] => Array
+                (
+                    [tactico] => DETERGENTE POLVO GOL 70 GR (DICIEMBRE)
+                    [cantidad] => 1
+                )
+
+        )
+
+)
+Datos recibidos: Array
+(
+    [receptor] => GERARDO PIRAY
+    [donantes] => Array
+        (
+            [0] => LUIS CABRERA
+        )
+
+    [intercambios] => Array
+        (
+            [0] => Array
+                (
+                    [tactico] => DETERGENTE POLVO GOL 70 GR (DICIEMBRE)
+                    [cantidad] => 1
+                )
+
+            [1] => Array
+                (
+                    [tactico] => LAVA DISCO 150 GR (DICIEMBRE)
+                    [cantidad] => 1
+                )
+
+            [2] => Array
+                (
+                    [tactico] => LAVA 115GR (DICIEMBRE)
+                    [cantidad] => 1
+                )
+
+            [3] => Array
+                (
+                    [tactico] => ESPONJAS (DICIEMBRE)
+                    [cantidad] => 1
+                )
+
+            [4] => Array
+                (
+                    [tactico] => Pinzas (DICIEMBRE)
+                    [cantidad] => 1
+                )
+
+        )
+
+)
