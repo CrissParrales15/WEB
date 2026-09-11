@@ -32,7 +32,10 @@ function obtenerMercaderista() {
         let selectMercaderista = `<option value="TODOS" selected> Todos Los Mercaderista </option>`;
         if (datos && datos.length > 0) {
           for (let i = 0; i < datos.length; i++) {
-            selectMercaderista += `<option value="${datos[i].mercaderista}">${datos[i].mercaderista}</option>`;
+            // value = id (no el nombre): hay mercaderistas con nombre+apellido duplicado
+            // (ej. "JENNIFFER ALBAN" existe en 2 cuentas distintas) y el nombre por sí
+            // solo no alcanza para distinguirlas en el combo ni en la consulta.
+            selectMercaderista += `<option value="${datos[i].id}">${datos[i].mercaderista}</option>`;
           }
         }
         document.getElementById("mercaderista").innerHTML = selectMercaderista;

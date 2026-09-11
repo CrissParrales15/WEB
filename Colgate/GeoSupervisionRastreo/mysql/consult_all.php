@@ -4,8 +4,12 @@ $dv    = isset($_GET['dv']) ? $_GET['dv'] : '';
 $sprv  = isset($_GET['sprv']) ? $_GET['sprv'] : '';
 $merc  = isset($_GET['merc']) ? $_GET['merc'] : '';
 $fecha = isset($_GET['fecha']) ? $_GET['fecha'] : '';
-$horaI = isset($_GET['horaI']) ? $_GET['horaI'] : '';
-$horaF = isset($_GET['horaF']) ? $_GET['horaF'] : '';
+
+// El <input type="time"> manda "HH:MM" (sin segundos), pero insert_gps_rastreo4.hora
+// guarda "HH:MM:SS". Completamos los segundos para que el BETWEEN cubra el minuto
+// límite entero (antes, p.ej. horaF=17:00 dejaba fuera los puntos de 17:00:01 a 17:00:59).
+$horaI = isset($_GET['horaI']) && $_GET['horaI'] !== '' ? $_GET['horaI'] . ':00' : '';
+$horaF = isset($_GET['horaF']) && $_GET['horaF'] !== '' ? $_GET['horaF'] . ':59' : '';
 
 // Solo señala si la coordenada se ve fuera del rango lógico de Ecuador.
 // No filtra nada, solo agrega un flag informativo.
@@ -23,7 +27,7 @@ function consultarSupervisor()
     require_once 'conexion.php';
 
     $data = [];
-    $result = $conn->query("SELECT DISTINCT supervisor FROM lvi_ruta_semanal_supervisores_v2 
+    $result = $conn->query("SELECT DISTINCT supervisor FROM /*lvi_ruta_semanal_supervisores_v2*/ lvi_ruta_semanal_v2 
         WHERE supervisor IS NOT NULL AND supervisor != '' 
         AND supervisor NOT LIKE '%PRUEBA%' 
         AND supervisor NOT LIKE '%TEST%'
@@ -118,6 +122,11 @@ function consultarRastreo($merc, $sprv, $fecha, $horaI, $horaF)
 
     $data = [];
 
+    // Ventana de dedup: colapsa lecturas repetidas en la misma coordenada si caen dentro
+    // de este margen de segundos (mitiga el bug de duplicados de 5pGoAppv2 mientras se
+    // despliega el fix a los celulares). Ver comentario en la query de abajo.
+    $ventanaDedupSegundos = 5;
+
     if ($merc == 'all') {
         // Primero obtenemos los mercaderistas del supervisor desde la base 5pgo
         $mercaderistas = [];
@@ -145,13 +154,30 @@ function consultarRastreo($merc, $sprv, $fecha, $horaI, $horaF)
         $placeholders = implode(',', array_fill(0, count($mercaderistas), '?'));
         $types = str_repeat('s', count($mercaderistas));
 
-        $sql = "SELECT * FROM insert_gps_rastreo4 
-            WHERE STR_TO_DATE(fecha, '%d/%m/%Y') = ? 
-            AND hora BETWEEN ? AND ? 
-            AND latitud != 'GPS DESACTIVADO' 
-            AND longitud != 'GPS DESACTIVADO' 
-            AND mercaderista IN ($placeholders)
-            GROUP BY latitud, longitud
+        // Dedup por VENTANA DE TIEMPO (no por segundo exacto): el bug de la app (ver
+        // 5pGoAppv2/LocationService.java) sigue activo en los celulares que no tengan la
+        // versión corregida instalada, y produce lecturas duplicadas en la MISMA coordenada
+        // pero con 1-2 segundos de diferencia en "hora" (confirmado con datos reales), así
+        // que un GROUP BY exacto por hora no las atrapa. Con LAG() descartamos una fila si
+        // repite la coordenada de la lectura inmediatamente anterior de ese mismo mercaderista
+        // dentro de $ventanaDedupSegundos segundos; una revisita real al mismo punto minutos
+        // después queda fuera de la ventana y se conserva.
+        $sql = "SELECT id, mercaderista, latitud, longitud, fecha, hora, fecha_servidor FROM (
+                SELECT t.*,
+                    LAG(latitud)  OVER (PARTITION BY mercaderista ORDER BY hora) AS prev_lat,
+                    LAG(longitud) OVER (PARTITION BY mercaderista ORDER BY hora) AS prev_lng,
+                    LAG(hora)     OVER (PARTITION BY mercaderista ORDER BY hora) AS prev_hora
+                FROM insert_gps_rastreo4 t
+                WHERE STR_TO_DATE(fecha, '%d/%m/%Y') = ?
+                AND hora BETWEEN ? AND ?
+                AND latitud != 'GPS DESACTIVADO'
+                AND longitud != 'GPS DESACTIVADO'
+                AND mercaderista IN ($placeholders)
+            ) w
+            WHERE prev_lat IS NULL
+               OR latitud <> prev_lat
+               OR longitud <> prev_lng
+               OR TIME_TO_SEC(TIMEDIFF(hora, prev_hora)) > $ventanaDedupSegundos
             ORDER BY mercaderista ASC, hora ASC";
 
         $stmt2 = $conn2->prepare($sql);
@@ -173,13 +199,23 @@ function consultarRastreo($merc, $sprv, $fecha, $horaI, $horaF)
         $stmt2->close();
         $conn->close();
     } else {
-        $stmt2 = $conn2->prepare("SELECT * FROM insert_gps_rastreo4 
-            WHERE mercaderista = ? 
-            AND STR_TO_DATE(fecha, '%d/%m/%Y') = ? 
-            AND hora BETWEEN ? AND ? 
-            AND latitud != 'GPS DESACTIVADO' 
-            AND longitud != 'GPS DESACTIVADO' 
-            GROUP BY latitud, longitud 
+        // Mismo criterio de dedup por ventana de tiempo que en la rama 'all' (ver comentario arriba).
+        $stmt2 = $conn2->prepare("SELECT id, mercaderista, latitud, longitud, fecha, hora, fecha_servidor FROM (
+                SELECT t.*,
+                    LAG(latitud)  OVER (PARTITION BY mercaderista ORDER BY hora) AS prev_lat,
+                    LAG(longitud) OVER (PARTITION BY mercaderista ORDER BY hora) AS prev_lng,
+                    LAG(hora)     OVER (PARTITION BY mercaderista ORDER BY hora) AS prev_hora
+                FROM insert_gps_rastreo4 t
+                WHERE mercaderista = ?
+                AND STR_TO_DATE(fecha, '%d/%m/%Y') = ?
+                AND hora BETWEEN ? AND ?
+                AND latitud != 'GPS DESACTIVADO'
+                AND longitud != 'GPS DESACTIVADO'
+            ) w
+            WHERE prev_lat IS NULL
+               OR latitud <> prev_lat
+               OR longitud <> prev_lng
+               OR TIME_TO_SEC(TIMEDIFF(hora, prev_hora)) > $ventanaDedupSegundos
             ORDER BY mercaderista ASC, hora ASC");
         $stmt2->bind_param("ssss", $merc, $fecha, $horaI, $horaF);
         $stmt2->execute();
