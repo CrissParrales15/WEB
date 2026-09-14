@@ -27,12 +27,20 @@ function consultarSupervisor()
     require_once 'conexion.php';
 
     $data = [];
-    $result = $conn->query("SELECT DISTINCT supervisor FROM /*lvi_ruta_semanal_supervisores_v2*/ lvi_ruta_semanal_v2 
-        WHERE supervisor IS NOT NULL AND supervisor != '' 
-        AND supervisor NOT LIKE '%PRUEBA%' 
-        AND supervisor NOT LIKE '%TEST%'
-        /*AND rol = 'Supervisor Lucky'*/
-        ORDER BY supervisor ASC");
+    // La vista lvi_ruta_semanal_v2 no se modifica: su columna "rol" es por fila del
+    // mercaderista, no del supervisor, así que no sirve para filtrar el rol del
+    // supervisor (por eso estaba comentado el intento de abajo). En su lugar se
+    // valida el rol real del supervisor en repositorio_usuarios: id_rol = 4 es
+    // "Supervisor Lucky" (repositorio_roles); id_rol = 1 es "Supervisor" a secas
+    // y no debe aparecer en este combo.
+    $result = $conn->query("SELECT DISTINCT v.supervisor
+        FROM lvi_ruta_semanal_v2 v
+        INNER JOIN repositorio_usuarios ru ON ru.usuario = v.supervisor
+        WHERE v.supervisor IS NOT NULL AND v.supervisor != ''
+        AND v.supervisor NOT LIKE '%PRUEBA%'
+        AND v.supervisor NOT LIKE '%TEST%'
+        AND ru.id_rol = 4
+        ORDER BY v.supervisor ASC");
 
     while ($r = $result->fetch_assoc()) {
         $data[] = $r;
