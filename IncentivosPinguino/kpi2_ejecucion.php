@@ -118,11 +118,27 @@ if (!isset($_SESSION['user_id'])) {
 =========================================== -->
 <div id="vista-cliente" class="vista-seccion active">
     
-    <!-- TARJETA: Sumatoria de Locales Correctos -->
-    <div style="display: flex; gap: 20px; margin-bottom: 20px;">
-        <div style="background: var(--bg-panel); border: 1px solid var(--brand-border); border-radius: 12px; padding: 20px; flex: 1; border-left: 4px solid #10b981;">
-            <h3 style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">🏪 Locales con Planimetría Correcta</h3>
-            <div id="kpi-card-correctas" style="font-size: 2rem; font-weight: bold; color: #10b981;">0</div>
+    <!-- NUEVO: 4 TARJETAS DE DESGLOSE DE PLANIMETRÍAS -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 25px;">
+        <!-- Card 1: Total Subidas -->
+        <div style="background: var(--bg-panel); border: 1px solid var(--brand-border); border-radius: 12px; padding: 20px; border-left: 4px solid #3b82f6;">
+            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">📸 Total Planimetrías (Fotos)</h3>
+            <div id="kpi2-totales" style="font-size: 2rem; font-weight: bold; color: #3b82f6;">0</div>
+        </div>
+        <!-- Card 2: Calificadas Correctas -->
+        <div style="background: var(--bg-panel); border: 1px solid var(--brand-border); border-radius: 12px; padding: 20px; border-left: 4px solid #10b981;">
+            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">✅ Calificadas Correctas</h3>
+            <div id="kpi2-correctas" style="font-size: 2rem; font-weight: bold; color: #10b981;">0</div>
+        </div>
+        <!-- Card 3: % Efectividad -->
+        <div style="background: var(--bg-panel); border: 1px solid var(--brand-border); border-radius: 12px; padding: 20px; border-left: 4px solid #8b5cf6;">
+            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">📈 % Aprobación</h3>
+            <div id="kpi2-pct-buenas" style="font-size: 2rem; font-weight: bold; color: #8b5cf6;">0%</div>
+        </div>
+        <!-- Card 4: % Rechazadas / Pendientes -->
+        <div style="background: var(--bg-panel); border: 1px solid var(--brand-border); border-radius: 12px; padding: 20px; border-left: 4px solid #ef4444;">
+            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">⚠️ % No válidas/Rechazadas</h3>
+            <div id="kpi2-pct-malas" style="font-size: 2rem; font-weight: bold; color: #ef4444;">0%</div>
         </div>
     </div>
 
@@ -136,6 +152,7 @@ if (!isset($_SESSION['user_id'])) {
                     <th style="padding: 12px 10px;">Mercaderista</th>
                     <th style="padding: 12px 10px;">PDVs Visitados</th>
                     <th style="padding: 12px 10px;">Total Planimetrías (Evidencias)</th>
+                    <th style="padding: 12px 10px; text-align: center;">Puntaje</th>
                 </tr>
             </thead>
             <tbody id="tabla-cliente-body">
@@ -207,7 +224,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById(`vista-${vista}`)) document.getElementById(`vista-${vista}`).classList.add('active');
     };
 
-    // const cargarEvidencias = async () => {
     const cargarEvidencias = async () => {
         let desde = inputDesde.value;
         let hasta = inputHasta.value;
@@ -215,12 +231,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // VALIDACIÓN: "Desde" no puede ser mayor que "Hasta"
         if (desde > hasta) {
-            // alert("La fecha 'Desde' no puede ser mayor a la fecha 'Hasta'. Se ajustará automáticamente.");
             hasta = desde; 
             inputHasta.value = hasta;
         }
 
-        document.getElementById('tabla-cliente-body').innerHTML = '<tr><td colspan="3" style="padding:20px; text-align:center;">Cargando...</td></tr>';
+        document.getElementById('tabla-cliente-body').innerHTML = '<tr><td colspan="4" style="padding:20px; text-align:center;">Cargando...</td></tr>';
         const galeria = document.getElementById('galeria-evidencias');
         if (galeria) galeria.innerHTML = '<p style="color: var(--text-muted);">Cargando evidencias...</p>';
 
@@ -264,32 +279,32 @@ document.addEventListener('DOMContentLoaded', () => {
         selectMercaderista.innerHTML = opciones;
     };
 
-   const pintarVistaCliente = (evidencias) => {
+    const pintarVistaCliente = (evidencias) => {
         const tbody = document.getElementById('tabla-cliente-body');
         const galeriaCliente = document.getElementById('galeria-cliente');
-        
 
-        document.querySelector('#vista-cliente thead').innerHTML = `
-            <tr style="color: var(--text-muted); border-bottom: 1px solid var(--brand-border); background-color: rgba(255,255,255,0.02);">
-                <th style="padding: 12px 10px;">Mercaderista</th>
-                <th style="padding: 12px 10px;">Locales Totales</th>
-                <th style="padding: 12px 10px;">Ejecuciones (Validadas / Totales)</th>
-                <th style="padding: 12px 10px; text-align: center;">Puntaje</th>
-            </tr>
-        `;
-        
         tbody.innerHTML = '';
         galeriaCliente.innerHTML = '';
 
+        // --- CÁLCULO DE LAS 4 TARJETAS NUEVAS ---
+        const totalFotos = evidencias.length;
+        const fotosCorrectas = evidencias.filter(e => e.validado === 1).length;
+        const pctBuenas = totalFotos > 0 ? Math.round((fotosCorrectas / totalFotos) * 100) : 0;
+        const pctMalas = totalFotos > 0 ? (100 - pctBuenas) : 0;
+
+        document.getElementById('kpi2-totales').textContent = totalFotos;
+        document.getElementById('kpi2-correctas').textContent = fotosCorrectas;
+        document.getElementById('kpi2-pct-buenas').textContent = pctBuenas + '%';
+        document.getElementById('kpi2-pct-malas').textContent = pctMalas + '%';
+        // ----------------------------------------
+
         if(evidencias.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3" style="padding:20px; text-align:center; color: var(--text-muted);">Sin datos en este rango de fechas.</td></tr>';
-            document.getElementById('kpi-card-correctas').textContent = '0';
+            tbody.innerHTML = '<tr><td colspan="4" style="padding:20px; text-align:center; color: var(--text-muted);">Sin datos en este rango de fechas.</td></tr>';
             return;
         }
 
         const resumen = {};
         let localesCorrectos = new Set(); 
-
 
         evidencias.forEach(ev => {
             if(!resumen[ev.mercaderista]) {
@@ -307,8 +322,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 localesCorrectos.add(ev.pdv);
             }
         });
-
-        document.getElementById('kpi-card-correctas').textContent = localesCorrectos.size;
 
         const resumenArray = Object.entries(resumen).map(([nombre, data]) => {
             const total = data.total || 0;
@@ -498,10 +511,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Listeners para los dos inputs de fecha
-    // inputDesde.addEventListener('change', () => { comboBoxLleno = false; cargarEvidencias(); });
-    // inputHasta.addEventListener('change', () => { comboBoxLleno = false; cargarEvidencias(); });
-    
     selectMercaderista.addEventListener('change', cargarEvidencias);
 
     cargarEvidencias();

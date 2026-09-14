@@ -287,29 +287,40 @@ function mercaderistaPorSup() {
 function obtenerRegistros(){
     require_once '../conection/conexion.php';
 
-    $supervisorID = $_POST['usuario']; // ID del supervisor (ej: "104")
-    $mercaderista = $_POST['mercaderista']; // Nombre de usuario del mercaderista (ej: "PRUEBA")
+    $supervisorID = (int) $_POST['usuario']; // ID del supervisor (repositorio_usuarios.id)
+    $mercaderistaId = $_POST['mercaderista']; // 'TODOS' o ID (repositorio_usuarios.id) del mercaderista elegido
     $fecha = $_POST['fecha'];
     $newDate = date("d/m/Y", strtotime($fecha));
 
     $data = array();
 
-    // Obtener el nombre completo del supervisor basado en su ID
-    // $querySupervisor = "SELECT CONCAT(nombre, ' ', apellido) as nombre_completo 
-    //                     FROM repositorio_usuarios 
-    //                     WHERE id = '$supervisorID' AND id_rol = 4";
-    
-    // $resultSupervisor = $conn->query($querySupervisor);
-    
-    // if (!$resultSupervisor || $resultSupervisor->num_rows == 0) {
-    //     return json_encode(['error' => 'Supervisor no encontrado']);
-    // }
-    
-    // $rowSupervisor = $resultSupervisor->fetch_assoc();
-    // $supervisorNombreCompleto = $rowSupervisor['nombre_completo']; // "TEST4 TEST5"
-    // $resultSupervisor->close();
+    // Hasta ~13/08/2026 el campo insert_registro.supervisor se grababa mal (bug de la app),
+    // por eso se cambió a resolver el supervisor vía repositorio_usuarios.id_supervisor.
+    // Desde esa fecha vr.supervisor SÍ es confiable y además refleja relevos/apoyos del día
+    // (mercaderistas que ese día reportaron a un supervisor distinto al que tienen asignado
+    // hoy en repositorio_usuarios). Por eso combinamos ambos criterios con OR, acotando
+    // vr.supervisor a partir de la fecha del fix para no arrastrar el dato histórico roto.
+    $fechaCorteSupervisor = '2026-08-13';
 
-    if($mercaderista == 'TODOS')
+    $querySupervisor = "SELECT usuario FROM repositorio_usuarios WHERE id = '$supervisorID' AND id_rol = 4";
+    $resultSupervisor = $conn->query($querySupervisor);
+
+    if (!$resultSupervisor || $resultSupervisor->num_rows == 0) {
+        return json_encode(['error' => 'Supervisor no encontrado']);
+    }
+
+    $supervisorNombre = $resultSupervisor->fetch_assoc()['usuario'];
+    $resultSupervisor->close();
+
+    $filtroSupervisor = "(
+        ru.id_supervisor = '$supervisorID'
+        OR (
+            STR_TO_DATE(vr.fecha, '%d/%m/%Y') >= '$fechaCorteSupervisor'
+            AND vr.supervisor = '$supervisorNombre'
+        )
+    )";
+
+    if($mercaderistaId == 'TODOS')
     {
         $sql = "SELECT vr.id_pdv AS pos_id, 
                        vr.channel, 
@@ -334,14 +345,13 @@ function obtenerRegistros(){
                        vr.fecha, 
                        vr.hora, 
                        s.distancia  
-                FROM repositorio_locales_dtt2 s 
-                INNER JOIN insert_registro vr ON s.pos_id = vr.id_pdv 
-                /*WHERE vr.supervisor = '$supervisorNombreCompleto'*/
+                FROM repositorio_locales_dtt2 s
+                INNER JOIN insert_registro vr ON s.pos_id = vr.id_pdv
                 INNER JOIN repositorio_usuarios ru
                     ON ru.usuario = vr.nombre
-                WHERE ru.id_supervisor = '$supervisorID'
-                  AND s.activar = 'SI' 
-                  AND vr.fecha = '$newDate' 
+                WHERE $filtroSupervisor
+                  AND s.activar = 'SI'
+                  AND vr.fecha = '$newDate'
                 GROUP BY vr.latitude, vr.longitude";
         
         $result = $conn->query($sql);
@@ -360,22 +370,31 @@ function obtenerRegistros(){
     }
     else
     {
-        // $mercaderista es el nombre de usuario (ej: "PRUEBA")
-        // Necesitamos obtener el nombre completo del mercaderista
-        $queryMercaderista = "SELECT CONCAT(nombre, ' ', apellido) as nombre_completo 
-                              FROM repositorio_usuarios 
-                              WHERE usuario = '$mercaderista' AND id_rol = 2";
-        
+        // $mercaderistaId es repositorio_usuarios.id (no el nombre): hay mercaderistas con
+        // nombre+apellido duplicado (ej. "JENNIFFER ALBAN" existe en 2 cuentas distintas,
+        // id 116 y 196) y el nombre por sí solo no alcanza para distinguirlas.
+        //
+        // OJO - limitación de datos: insert_registro.nombre solo guarda "Nombre Apellido"
+        // (no el usuario ni el id de quien hizo el check-in/out), así que aunque aquí
+        // resolvamos el id correcto, si existen 2 cuentas con el mismo nombre+apellido sus
+        // registros seguirán sin poder separarse entre sí — eso solo se resuelve si la app
+        // graba el usuario o el id en insert_registro.
+        $mercaderistaId = (int) $mercaderistaId;
+
+        $queryMercaderista = "SELECT CONCAT(nombre, ' ', apellido) as nombre_completo
+                              FROM repositorio_usuarios
+                              WHERE id = '$mercaderistaId' AND id_rol = 2";
+
         $resultMercaderista = $conn->query($queryMercaderista);
-        
+
         if (!$resultMercaderista || $resultMercaderista->num_rows == 0) {
             return json_encode(['error' => 'Mercaderista no encontrado']);
         }
-        
+
         $rowMercaderista = $resultMercaderista->fetch_assoc();
         $mercaderistaNombreCompleto = $rowMercaderista['nombre_completo'];
         $resultMercaderista->close();
-        
+
         $sql = "SELECT vr.id_pdv AS pos_id, 
                        vr.channel, 
                        vr.customer_owner, 
