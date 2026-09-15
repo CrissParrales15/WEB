@@ -2,7 +2,8 @@
 header('Content-Type: application/json; charset=utf-8');
 date_default_timezone_set('America/Guayaquil');
 
-require_once '../Core/DataSource.php'; 
+require_once '../Core/ApiAuth.php';
+require_once '../Core/DataSource.php';
 use Phppot\DataSource;
 
 try {

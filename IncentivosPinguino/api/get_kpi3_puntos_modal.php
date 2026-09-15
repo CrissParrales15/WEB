@@ -2,12 +2,13 @@
 header('Content-Type: application/json; charset=utf-8');
 date_default_timezone_set('America/Guayaquil');
 
+require_once '../core/ApiAuth.php';
 require_once '../core/DataSource.php';
 use Phppot\DataSource;
 
 try {
     $db = new DataSource();
-    
+
     if (!isset($_GET['id_usuario']) || !isset($_GET['fecha'])) {
         throw new \Exception("Faltan parámetros obligatorios.");
     }
