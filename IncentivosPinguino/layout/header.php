@@ -18,6 +18,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Incentivos Pinguino | Dashboard</title>
+    <!-- Aplica el tema guardado ANTES de pintar la página, para evitar el parpadeo oscuro→claro -->
+    <script>
+        (function () {
+            var tema = localStorage.getItem('pinguino-theme') || 'dark';
+            if (tema === 'light') document.documentElement.setAttribute('data-theme', 'light');
+        })();
+    </script>
     <link rel="stylesheet" href="assets/css/style.css">
     <!-- Font Awesome 6 (gratuito) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -35,22 +42,22 @@ $current_page = basename($_SERVER['PHP_SELF']);
         
         <nav class="sidebar-nav">
             <a href="index.php" class="nav-link <?= ($current_page == 'index.php') ? 'active' : '' ?>">
-                <span class="nav-icon">📊</span>
+                <span class="nav-icon"><i class="fas fa-chart-simple" style="color: var(--brand-accent);"></i></span>
                 <span class="hide-on-collapse">Dashboard</span>
             </a>
-            
+
             <a href="kpi1_visita.php" class="nav-link <?= ($current_page == 'kpi1_visita.php') ? 'active' : '' ?>">
-                <span class="nav-icon">📍</span>
+                <span class="nav-icon"><i class="fas fa-location-dot" style="color: var(--kpi1-color);"></i></span>
                 <span class="hide-on-collapse">KPI 1 · Visita</span>
             </a>
-            
+
             <a href="kpi2_ejecucion.php" class="nav-link <?= ($current_page == 'kpi2_ejecucion.php') ? 'active' : '' ?>">
-                <span class="nav-icon">📸</span>
+                <span class="nav-icon"><i class="fas fa-camera" style="color: var(--kpi2-color);"></i></span>
                 <span class="hide-on-collapse">KPI 2 · Ejecución</span>
             </a>
-            
+
             <a href="kpi3_oc.php" class="nav-link <?= ($current_page == 'kpi3_oc.php') ? 'active' : '' ?>">
-                <span class="nav-icon">🛒</span>
+                <span class="nav-icon"><i class="fas fa-cart-shopping" style="color: var(--kpi3-color);"></i></span>
                 <span class="hide-on-collapse">KPI 3 · OC</span>
             </a>
         </nav>
@@ -73,11 +80,47 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 </div>
             </div>
 
+            <!-- Botón de Tema Claro/Oscuro -->
+            <button type="button" id="themeToggleBtn" class="theme-toggle hide-on-collapse" title="Cambiar tema">
+                <i class="fas fa-sun"></i>
+            </button>
+
             <!-- Botón de Salir -->
             <a href="logout.php" class="hide-on-collapse" title="Cerrar Sesión" style="color: #ef4444; font-size: 1.2rem; text-decoration: none; transition: transform 0.2s;">
-                🚪
+                <i class="fas fa-right-from-bracket"></i>
             </a>
         </div>
+
+        <script>
+            (function () {
+                var btn = document.getElementById('themeToggleBtn');
+                var icon = btn.querySelector('i');
+
+                function actualizarIcono() {
+                    var esClaro = document.documentElement.getAttribute('data-theme') === 'light';
+                    icon.className = esClaro ? 'fas fa-moon' : 'fas fa-sun';
+                    btn.title = esClaro ? 'Cambiar a tema oscuro' : 'Cambiar a tema claro';
+                }
+
+                btn.addEventListener('click', function () {
+                    var esClaro = document.documentElement.getAttribute('data-theme') === 'light';
+                    if (esClaro) {
+                        document.documentElement.removeAttribute('data-theme');
+                        localStorage.setItem('pinguino-theme', 'dark');
+                    } else {
+                        document.documentElement.setAttribute('data-theme', 'light');
+                        localStorage.setItem('pinguino-theme', 'light');
+                    }
+                    actualizarIcono();
+                    // Avisa a la página (gráficos Chart.js, mapas Leaflet, etc.) para que se redibujen con el tema nuevo
+                    window.dispatchEvent(new CustomEvent('pinguino-theme-changed', {
+                        detail: { theme: esClaro ? 'dark' : 'light' }
+                    }));
+                });
+
+                actualizarIcono();
+            })();
+        </script>
     </aside>
 
     <!-- MAIN WRAPPER -->
@@ -86,7 +129,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <!-- TOPBAR -->
         <header class="topbar">
             <!-- <div class="topbar-left">
-                <button class="toggle-btn" id="sidebarToggle">☰</button>
+                <button class="toggle-btn" id="sidebarToggle"><i class="fas fa-bars"></i></button>
                 <input type="text" class="search-bar" placeholder="Buscar PDV, zona, etc...">
             </div> -->
             <!-- <div class="topbar-right">

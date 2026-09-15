@@ -11,6 +11,14 @@ if (isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | Dashboard Ejecutivo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Aplica el tema guardado ANTES de pintar la página, para evitar el parpadeo oscuro→claro -->
+    <script>
+        (function () {
+            var tema = localStorage.getItem('pinguino-theme') || 'dark';
+            if (tema === 'light') document.documentElement.setAttribute('data-theme', 'light');
+        })();
+    </script>
     <style>
         :root {
             --bg-main: #0B0E14;
@@ -19,15 +27,38 @@ if (isset($_SESSION['user_id'])) {
             --text-main: #FFFFFF;
             --text-muted: #8E96A8;
             --brand-color: #8b5cf6;
+            --input-bg: rgba(0,0,0,0.2);
+            --glow-color: #2c1a4d;
+        }
+
+        html[data-theme="light"] {
+            --bg-main: #f3f4f6;
+            --bg-card: rgba(255, 255, 255, 0.85);
+            --border-color: #d1d5db;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --input-bg: rgba(0,0,0,0.03);
+            --glow-color: #ded4f7;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        
+
         body {
             background-color: var(--bg-main);
-            background-image: radial-gradient(circle at 50% -20%, #2c1a4d 0%, var(--bg-main) 40%);
+            background-image: radial-gradient(circle at 50% -20%, var(--glow-color) 0%, var(--bg-main) 40%);
             height: 100vh; display: flex; align-items: center; justify-content: center; color: var(--text-main);
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
+
+        .theme-toggle-login {
+            position: absolute; top: 20px; right: 20px;
+            background: none; border: 1px solid var(--border-color);
+            color: var(--text-muted); cursor: pointer;
+            width: 36px; height: 36px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; transition: all 0.2s;
+        }
+        .theme-toggle-login:hover { color: var(--text-main); background: rgba(139, 92, 246, 0.1); }
 
         .login-container {
             background: var(--bg-card); backdrop-filter: blur(10px);
@@ -43,8 +74,8 @@ if (isset($_SESSION['user_id'])) {
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
         .input-group input {
-            width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.2);
-            border: 1px solid var(--border-color); border-radius: 8px; color: white;
+            width: 100%; padding: 12px 15px; background: var(--input-bg);
+            border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main);
             font-size: 1rem; outline: none; transition: border 0.3s;
         }
         .input-group input:focus { border-color: var(--brand-color); background: rgba(139, 92, 246, 0.05); }
@@ -64,6 +95,10 @@ if (isset($_SESSION['user_id'])) {
     </style>
 </head>
 <body>
+
+    <button type="button" id="themeToggleBtn" class="theme-toggle-login" title="Cambiar tema">
+        <i class="fas fa-sun"></i>
+    </button>
 
     <div class="login-container">
         <div class="login-logo">🐧</div>
@@ -99,7 +134,7 @@ if (isset($_SESSION['user_id'])) {
             
             // Estado de carga
             btn.disabled = true;
-            btn.innerHTML = 'Validando... ⏳';
+            btn.innerHTML = 'Validando... <i class="fas fa-spinner fa-spin"></i>';
             errorBox.style.display = 'none';
 
             const formData = new FormData(form);
@@ -113,7 +148,7 @@ if (isset($_SESSION['user_id'])) {
                 const data = await response.json();
 
                 if (data.status === 'success') {
-                    btn.innerHTML = '¡Acceso Concedido! ✓';
+                    btn.innerHTML = '¡Acceso Concedido! <i class="fas fa-check"></i>';
                     btn.style.background = '#10b981'; 
                     
                     // Redirigir al dashboard tras 1 segundo
@@ -134,6 +169,31 @@ if (isset($_SESSION['user_id'])) {
                 btn.innerHTML = 'Iniciar Sesión';
             }
         });
+
+        (function () {
+            var btn = document.getElementById('themeToggleBtn');
+            var icon = btn.querySelector('i');
+
+            function actualizarIcono() {
+                var esClaro = document.documentElement.getAttribute('data-theme') === 'light';
+                icon.className = esClaro ? 'fas fa-moon' : 'fas fa-sun';
+                btn.title = esClaro ? 'Cambiar a tema oscuro' : 'Cambiar a tema claro';
+            }
+
+            btn.addEventListener('click', function () {
+                var esClaro = document.documentElement.getAttribute('data-theme') === 'light';
+                if (esClaro) {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('pinguino-theme', 'dark');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    localStorage.setItem('pinguino-theme', 'light');
+                }
+                actualizarIcono();
+            });
+
+            actualizarIcono();
+        })();
     </script>
 </body>
 </html>

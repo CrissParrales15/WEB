@@ -45,6 +45,9 @@ if (!isset($_SESSION['user_id'])) {
         opacity: 1;
         cursor: pointer;
     }
+    html[data-theme="light"] input[type="date"].search-bar::-webkit-calendar-picker-indicator {
+        filter: none;
+    }
 
     /* --- ESTILOS GALERÍA (Auditoría) --- */
     .gallery-grid {
@@ -126,17 +129,17 @@ if (!isset($_SESSION['user_id'])) {
         </select>
 
         <button class="btn-action btn-refresh" onclick="comboBoxLleno = false; cargarEvidencias()" style="background: rgba(0, 255, 135, 0.1); color: #00FF87; border: 1px solid rgba(0, 255, 135, 0.3); padding: 8px 15px; border-radius: 6px; cursor: pointer;">
-            ↻ Actualizar
+            <i class="fas fa-rotate"></i> Actualizar
         </button>
     </div>
 </div>
 
 <!-- TABS (Pestañas de Navegación) -->
 <div class="tabs-container">
-    <button id="tab-cliente" class="tab-btn active" onclick="cambiarVista('cliente')">📊 Vista Cliente (Resumen)</button>
-    
+    <button id="tab-cliente" class="tab-btn active" onclick="cambiarVista('cliente')"><i class="fas fa-chart-simple"></i> Vista Cliente (Resumen)</button>
+
     <?php if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] === 'CALIFICADOR'): ?>
-        <button id="tab-auditoria" class="tab-btn" onclick="cambiarVista('auditoria')">📸 Vista Auditoría (Validación)</button>
+        <button id="tab-auditoria" class="tab-btn" onclick="cambiarVista('auditoria')"><i class="fas fa-camera"></i> Vista Auditoría (Validación)</button>
     <?php endif; ?>
 </div>
 
@@ -149,22 +152,22 @@ if (!isset($_SESSION['user_id'])) {
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 25px;">
         <!-- Card 1: Total Subidas -->
         <div style="background: var(--bg-panel); border: 1px solid var(--brand-border); border-radius: 12px; padding: 20px; border-left: 4px solid #3b82f6;">
-            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">📸 Total Planimetrías (Fotos)</h3>
+            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;"><i class="fas fa-camera" style="color: #3b82f6;"></i> Total Planimetrías (Fotos)</h3>
             <div id="kpi2-totales" style="font-size: 2rem; font-weight: bold; color: #3b82f6;">0</div>
         </div>
         <!-- Card 2: Calificadas Correctas -->
         <div style="background: var(--bg-panel); border: 1px solid var(--brand-border); border-radius: 12px; padding: 20px; border-left: 4px solid #10b981;">
-            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">✅ Calificadas Correctas</h3>
+            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;"><i class="fas fa-circle-check" style="color: #10b981;"></i> Calificadas Correctas</h3>
             <div id="kpi2-correctas" style="font-size: 2rem; font-weight: bold; color: #10b981;">0</div>
         </div>
         <!-- Card 3: % Efectividad -->
         <div style="background: var(--bg-panel); border: 1px solid var(--brand-border); border-radius: 12px; padding: 20px; border-left: 4px solid #8b5cf6;">
-            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">📈 % Aprobación</h3>
+            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;"><i class="fas fa-arrow-trend-up" style="color: #8b5cf6;"></i> % Aprobación</h3>
             <div id="kpi2-pct-buenas" style="font-size: 2rem; font-weight: bold; color: #8b5cf6;">0%</div>
         </div>
         <!-- Card 4: % Rechazadas / Pendientes -->
         <div style="background: var(--bg-panel); border: 1px solid var(--brand-border); border-radius: 12px; padding: 20px; border-left: 4px solid #ef4444;">
-            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">⚠️ % No válidas/Rechazadas</h3>
+            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;"><i class="fas fa-triangle-exclamation" style="color: #ef4444;"></i> % No válidas/Rechazadas</h3>
             <div id="kpi2-pct-malas" style="font-size: 2rem; font-weight: bold; color: #ef4444;">0%</div>
         </div>
     </div>
@@ -189,7 +192,7 @@ if (!isset($_SESSION['user_id'])) {
     </div>
 
     <!-- GALERÍA VISTA CLIENTE (Solo aprobadas) -->
-    <h3 style="color: var(--text-main); margin-bottom: 15px;">📸 Evidencias Calificadas</h3>
+    <h3 style="color: var(--text-main); margin-bottom: 15px;"><i class="fas fa-camera"></i> Evidencias Calificadas</h3>
     <div id="galeria-cliente" class="gallery-grid">
         <!-- Se llena por JS -->
     </div>
@@ -393,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const tr = `
                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.02);">
-                    <td style="padding: 15px 10px; color: var(--text-main); font-weight: 500;">👤 ${nombre}</td>
+                    <td style="padding: 15px 10px; color: var(--text-main); font-weight: 500;"><i class="fas fa-user"></i> ${nombre}</td>
                     <td style="padding: 15px 10px; color: var(--text-muted);">${pdvs.size} Locales Totales</td>
                     <td style="padding: 15px 10px; color: var(--text-muted);">
                         <span style="color: ${colorTexto}; font-weight: bold;">${validadas}</span> / ${total} 
@@ -423,10 +426,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="card-header">
                     <div>
                         <div style="color: var(--text-main); font-weight: bold; font-size: 0.95rem;">${ev.pdv}</div>
-                        <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">👤 ${ev.mercaderista}</div>
+                        <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;"><i class="fas fa-user"></i> ${ev.mercaderista}</div>
                     </div>
                     <div style="text-align: right;">
-                        <div style="color: var(--brand-accent); font-size: 0.8rem;">📅 ${ev.fecha_trabajo} | ⏱ ${ev.hora}</div>
+                        <div style="color: var(--brand-accent); font-size: 0.8rem;"><i class="fas fa-calendar-days"></i> ${ev.fecha_trabajo} | <i class="fas fa-clock"></i> ${ev.hora}</div>
                     </div>
                 </div>
 
@@ -454,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 <!-- BARRA DE ESTADO SIN ACCIÓN -->
                 <div style="padding: 10px; text-align: center; background-color: rgba(16,185,129,0.1); color: #10b981; font-weight: bold; border-top: 1px solid var(--brand-border); font-size: 0.85rem;">
-                    ☑ PLANIMETRÍA APROBADA
+                    <i class="fas fa-square-check"></i> PLANIMETRÍA APROBADA
                 </div>
             </div>
         `;
@@ -479,7 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.id = 'btn-cargar-mas-cliente';
             btn.type = 'button';
             btn.style.cssText = 'grid-column: 1 / -1; margin-top: 10px; padding: 12px; background: rgba(139,92,246,0.1); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.3); border-radius: 8px; cursor: pointer; font-weight: bold;';
-            btn.textContent = `↓ Cargar más evidencias (${aprobadas.length - clienteOffset} restantes)`;
+            btn.innerHTML = `<i class="fas fa-chevron-down"></i> Cargar más evidencias (${aprobadas.length - clienteOffset} restantes)`;
             btn.onclick = () => renderizarLoteCliente(aprobadas);
             galeriaCliente.appendChild(btn);
         }
@@ -492,10 +495,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="card-header">
                     <div>
                         <div style="color: var(--text-main); font-weight: bold; font-size: 0.95rem;">${ev.pdv}</div>
-                        <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">👤 ${ev.mercaderista}</div>
+                        <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;"><i class="fas fa-user"></i> ${ev.mercaderista}</div>
                     </div>
                     <div style="text-align: right;">
-                        <div style="color: var(--brand-accent); font-size: 0.8rem;">📅 ${ev.fecha_trabajo} | ⏱ ${ev.hora}</div>
+                        <div style="color: var(--brand-accent); font-size: 0.8rem;"><i class="fas fa-calendar-days"></i> ${ev.fecha_trabajo} | <i class="fas fa-clock"></i> ${ev.hora}</div>
                     </div>
                 </div>
 
@@ -554,7 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.id = 'btn-cargar-mas-auditoria';
             btn.type = 'button';
             btn.style.cssText = 'grid-column: 1 / -1; margin-top: 10px; padding: 12px; background: rgba(139,92,246,0.1); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.3); border-radius: 8px; cursor: pointer; font-weight: bold;';
-            btn.textContent = `↓ Cargar más evidencias (${evidencias.length - auditoriaOffset} restantes)`;
+            btn.innerHTML = `<i class="fas fa-chevron-down"></i> Cargar más evidencias (${evidencias.length - auditoriaOffset} restantes)`;
             btn.onclick = () => renderizarLoteAuditoria(evidencias);
             contenedor.appendChild(btn);
         }
