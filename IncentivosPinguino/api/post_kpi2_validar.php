@@ -2,6 +2,14 @@
 header('Content-Type: application/json; charset=utf-8');
 date_default_timezone_set('America/Guayaquil');
 
+require_once '../core/ApiAuth.php';
+
+if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'CALIFICADOR') {
+    http_response_code(403);
+    echo json_encode(['status' => 'error', 'message' => 'No tienes permiso para realizar esta acción.']);
+    exit;
+}
+
 require_once '../core/DataSource.php';
 use Phppot\DataSource;
 
@@ -15,8 +23,9 @@ try {
     }
 
     $id_evidencia = $data['id_evidencia'];
-    // Si validado es 1 lo guardamos como 1, si es 0 lo guardamos como NULL
-    $estado_validado = (isset($data['validado']) && $data['validado'] == 1) ? 1 : null;
+    // Estados válidos: 1 = revisado/aprobado, 2 = reportado. Cualquier otro valor (0) se guarda como NULL (pendiente).
+    $estado_recibido = isset($data['validado']) ? (int)$data['validado'] : 0;
+    $estado_validado = in_array($estado_recibido, [1, 2], true) ? $estado_recibido : null;
 
     $db = new DataSource();
     

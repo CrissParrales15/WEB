@@ -6,26 +6,45 @@
 <style>
     /* VARIABLES DE COLOR DEL DASHBOARD */
     :root {
-        --kpi1-color: #00FF87; 
-        --kpi2-color: #00A3FF; 
-        --kpi3-color: #B958FF; 
+        --kpi1-color: #00FF87;
+        --kpi2-color: #00A3FF;
+        --kpi3-color: #B958FF;
         --bg-card: #151A25;
         --border-color: #2A3143;
         --text-main: #FFFFFF;
         --text-muted: #8E96A8;
+        --select-bg: #1E2536;
+        --select-bg-hover: #2A3143;
+        --track-bg: #2A3143;
+        --modal-overlay-bg: rgba(0,0,0,0.85);
+        --scrollbar-thumb: #3f4963;
     }
 
+    html[data-theme="light"] {
+        --bg-card: #ffffff;
+        --border-color: #dbe0e8;
+        --text-main: #111827;
+        --text-muted: #6b7280;
+        --select-bg: #f1f3f7;
+        --select-bg-hover: #e5e9f0;
+        --track-bg: #e5e9f0;
+        --modal-overlay-bg: rgba(0,0,0,0.4);
+        --scrollbar-thumb: #c7ccd6;
+    }
+
+    html[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator { filter: none; }
+
     .dash-container { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: var(--text-main); }
-    
+
     /* Header del Dashboard */
     .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
     .dash-title h1 { font-size: 24px; font-weight: 700; margin: 0 0 5px 0; }
     .dash-title p { color: var(--text-muted); font-size: 13px; margin: 0; }
-    
+
     .dash-filters { display: flex; gap: 10px; align-items: center; }
-    .dash-select { background: #1E2536; border: 1px solid var(--border-color); color: white; padding: 8px 15px; border-radius: 6px; outline: none; }
-    .btn-action { background: #1E2536; border: 1px solid var(--border-color); color: white; padding: 8px 15px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
-    .btn-action:hover { background: #2A3143; }
+    .dash-select { background: var(--select-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 15px; border-radius: 6px; outline: none; }
+    .btn-action { background: var(--select-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 15px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+    .btn-action:hover { background: var(--select-bg-hover); }
     .btn-refresh { background: rgba(0, 255, 135, 0.1); color: var(--kpi1-color); border: 1px solid rgba(0, 255, 135, 0.3); }
 
     /* Grid Superior (Tarjetas 3 columnas) */
@@ -57,7 +76,7 @@
     
     .kpi-footer { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
     
-    .progress-bg { background: #2A3143; height: 6px; border-radius: 3px; width: 100%; }
+    .progress-bg { background: var(--track-bg); height: 6px; border-radius: 3px; width: 100%; }
     .progress-bar { height: 6px; border-radius: 3px; transition: width 1s ease-in-out; }
 
     .kpi1-text { color: var(--kpi1-color); }
@@ -84,17 +103,17 @@
 
     .mini-bar-group { margin-bottom: 15px; }
     .mini-bar-labels { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; color: var(--text-muted); }
-    .mini-bar-bg { background: #2A3143; height: 4px; border-radius: 2px; }
+    .mini-bar-bg { background: var(--track-bg); height: 4px; border-radius: 2px; }
 
     /* Ranking */
     .ranking-list { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
     .ranking-list::-webkit-scrollbar { width: 4px; }
-    .ranking-list::-webkit-scrollbar-thumb { background: #3f4963; border-radius: 2px; }
+    .ranking-list::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 2px; }
     .rank-item { margin-bottom: 15px; }
     .rank-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .rank-left { display: flex; align-items: center; gap: 12px; }
     .rank-pos { color: #FFB800; font-weight: bold; width: 15px; }
-    .rank-avatar { width: 30px; height: 30px; border-radius: 50%; background: #1E2D2A; color: var(--kpi1-color); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
+    .rank-avatar { width: 30px; height: 30px; border-radius: 50%; background: rgba(0,255,135,0.12); color: var(--kpi1-color); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
     .rank-name { font-size: 13px; font-weight: 500; }
     .rank-right { display: flex; align-items: center; gap: 15px; }
     .rank-pts { font-weight: bold; font-size: 14px; }
@@ -111,14 +130,14 @@
     .estado-nocumple { color: #FF3B30; border-color: rgba(255,59,48,0.3); }
 
     /* ESTILOS DEL MODAL */
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-overlay-bg); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
     .modal-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; width: 550px; max-width: 95%; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
     .modal-header { display: flex; justify-content: space-between; padding: 20px 25px; border-bottom: 1px solid var(--border-color); background: rgba(255,255,255,0.02); }
     .modal-close { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; transition: 0.2s; }
-    .modal-close:hover { color: white; }
+    .modal-close:hover { color: var(--text-main); }
     .modal-body { overflow-y: auto; padding: 0 25px 20px 25px; }
     .modal-body::-webkit-scrollbar { width: 6px; }
-    .modal-body::-webkit-scrollbar-thumb { background: #3f4963; border-radius: 3px; }
+    .modal-body::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
 </style>
 
 <div class="dash-container">
@@ -145,7 +164,7 @@
                 <option value="all">Todo el Equipo</option>
             </select>
             
-            <button class="btn-action btn-refresh" onclick="cargarDataDashboard()">↻ Actualizar</button>
+            <button class="btn-action btn-refresh" onclick="cargarDataDashboard()"><i class="fas fa-rotate"></i> Actualizar</button>
         </div>
     </div>
 
@@ -153,7 +172,7 @@
     <div class="kpi-grid">
         <!-- KPI 1 -->
         <div class="kpi-card" onclick="abrirDesgloseKPI(1)">
-            <div class="kpi-header"><span>📍 EFECTIVIDAD DE VISITA</span> <span style="font-size:10px;">(Click para detalles)</span></div>
+            <div class="kpi-header"><span><i class="fas fa-location-dot kpi1-text"></i> EFECTIVIDAD DE VISITA</span> <span style="font-size:10px;">(Click para detalles)</span></div>
             <div class="kpi-value kpi1-text"><span id="val-pct-1">0</span><span> %</span></div>
             <div>
                 <div class="kpi-footer">
@@ -166,7 +185,7 @@
         
         <!-- KPI 2 -->
         <div class="kpi-card" onclick="abrirDesgloseKPI(2)">
-            <div class="kpi-header"><span>📸 EJECUCIÓN EN PDV</span> <span style="font-size:10px;">(Click para detalles)</span></div>
+            <div class="kpi-header"><span><i class="fas fa-camera kpi2-text"></i> EJECUCIÓN EN PDV</span> <span style="font-size:10px;">(Click para detalles)</span></div>
             <div class="kpi-value kpi2-text"><span id="val-pct-2">0</span><span> %</span></div>
             <div>
                 <div class="kpi-footer">
@@ -179,7 +198,7 @@
 
         <!-- KPI 3 -->
         <div class="kpi-card" onclick="abrirDesgloseKPI(3)">
-            <div class="kpi-header"><span>🛒 ÓRDENES DE COMPRA</span> <span style="font-size:10px;">(Click para detalles)</span></div>
+            <div class="kpi-header"><span><i class="fas fa-cart-shopping kpi3-text"></i> ÓRDENES DE COMPRA</span> <span style="font-size:10px;">(Click para detalles)</span></div>
             <div class="kpi-value kpi3-text"><span id="val-pct-3">0</span><span> %</span></div>
             <div>
                 <div class="kpi-footer">
@@ -255,7 +274,7 @@
     <div class="modal-box">
         <div class="modal-header">
             <div>
-                <h3 id="tituloModalKPI" style="color: white; margin: 0; font-size: 1.2rem;">Desglose KPI</h3>
+                <h3 id="tituloModalKPI" style="color: var(--text-main); margin: 0; font-size: 1.2rem;">Desglose KPI</h3>
                 <p id="subtituloModalKPI" style="color: var(--text-muted); font-size: 0.85rem; margin: 5px 0 0 0;">Meta por usuario: 0 pts</p>
             </div>
             <button class="modal-close" onclick="document.getElementById('modalDesgloseKPI').style.display='none'">&times;</button>
@@ -279,7 +298,17 @@
 <script>
     let donutChartInstance = null;
     let lineChartInstance = null;
-    let datosRankingGlobal = []; 
+    let datosRankingGlobal = [];
+
+    // Lee la variable CSS actual (cambia con el tema) para usarla en colores de canvas (Chart.js no entiende var())
+    function getCssVar(nombre) {
+        return getComputedStyle(document.documentElement).getPropertyValue(nombre).trim();
+    }
+
+    // Cuando el usuario cambia de tema, redibuja los gráficos con los colores correctos
+    window.addEventListener('pinguino-theme-changed', () => {
+        if (typeof cargarDataDashboard === 'function') cargarDataDashboard();
+    });
 
     document.addEventListener("DOMContentLoaded", () => {
         const hoy = new Date();
@@ -514,7 +543,7 @@
                 labels: ['Logrado', 'Faltante'],
                 datasets: [{
                     data: [donutTotal, faltante < 0 ? 0 : faltante],
-                    backgroundColor: [mainColor, '#1E2536'],
+                    backgroundColor: [mainColor, getCssVar('--track-bg')],
                     borderWidth: 0,
                     cutout: '85%'
                 }]
@@ -633,7 +662,7 @@
                 },
                 scales: {
                     x: { grid: { display: false, drawBorder: false }, ticks: { color: '#8E96A8', font: {size: 11} } },
-                    y: { min: 0, max: 100, grid: { color: '#1E2536', drawBorder: false }, ticks: { color: '#8E96A8', font: {size: 11}, stepSize: 20 } }
+                    y: { min: 0, max: 100, grid: { color: getCssVar('--track-bg'), drawBorder: false }, ticks: { color: '#8E96A8', font: {size: 11}, stepSize: 20 } }
                 }
             }
         });
@@ -651,15 +680,15 @@
         let llavePts = '', colorMeta = '';
 
         if (kpiId === 1) {
-            titulo.innerText = '📍 Desglose: Efectividad de Visita';
+            titulo.innerHTML = '<i class="fas fa-location-dot kpi1-text"></i> Desglose: Efectividad de Visita';
             subtitulo.innerText = 'Meta variable según el rol del usuario (400 pts o 500 pts)';
             llavePts = 'kpi1_pts'; colorMeta = 'var(--kpi1-color)';
         } else if (kpiId === 2) {
-            titulo.innerText = '📸 Desglose: Ejecución en PDV';
+            titulo.innerHTML = '<i class="fas fa-camera kpi2-text"></i> Desglose: Ejecución en PDV';
             subtitulo.innerText = 'Meta variable según el rol del usuario (300 pts o 500 pts)';
             llavePts = 'kpi2_pts'; colorMeta = 'var(--kpi2-color)';
         } else if (kpiId === 3) {
-            titulo.innerText = '🛒 Desglose: Órdenes de Compra';
+            titulo.innerHTML = '<i class="fas fa-cart-shopping kpi3-text"></i> Desglose: Órdenes de Compra';
             subtitulo.innerText = 'Meta general: 300 pts (Regla: >70% diario = +15 pts. Canal TIA)';
             llavePts = 'kpi3_pts'; colorMeta = 'var(--kpi3-color)';
         }
@@ -684,7 +713,7 @@
 
             const fila = `
                 <tr style="border-bottom: 1px solid var(--border-color); transition: background 0.2s;">
-                    <td style="padding: 15px 10px; color: white; font-weight: 500;">
+                    <td style="padding: 15px 10px; color: var(--text-main); font-weight: 500;">
                         ${merca.nombre}
                     </td>
                     <td style="padding: 15px 10px; text-align: right; font-weight: bold; font-size: 1.1rem; color: ${colorTexto};">

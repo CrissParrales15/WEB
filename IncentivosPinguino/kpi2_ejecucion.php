@@ -45,6 +45,9 @@ if (!isset($_SESSION['user_id'])) {
         opacity: 1;
         cursor: pointer;
     }
+    html[data-theme="light"] input[type="date"].search-bar::-webkit-calendar-picker-indicator {
+        filter: none;
+    }
 
     /* --- ESTILOS GALERÍA (Auditoría) --- */
     .gallery-grid {
@@ -63,21 +66,48 @@ if (!isset($_SESSION['user_id'])) {
     .img-box:hover img { transform: scale(1.05); }
     .img-label { position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.7); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; }
     .card-body { padding: 15px; flex: 1; }
-    .btn-validar {
-        width: 100%; padding: 10px; border: none; background-color: var(--bg-dark);
-        color: var(--text-muted); border-top: 1px solid var(--brand-border);
-        cursor: pointer; font-weight: bold; transition: all 0.2s;
+    .btn-group-auditoria { display: flex; border-top: 1px solid var(--brand-border); }
+    .btn-validar, .btn-reportar {
+        flex: 1; padding: 10px; border: none; background-color: var(--bg-dark);
+        color: var(--text-muted); cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: all 0.2s;
+        display: flex; align-items: center; justify-content: center; gap: 6px;
     }
-    .btn-validar:hover { background-color: var(--bg-hover); color: var(--text-main); }
+    .btn-validar { border-right: 1px solid var(--brand-border); }
+    .btn-validar:hover, .btn-reportar:hover { background-color: var(--bg-hover); color: var(--text-main); }
     .btn-validar.aprobado { background-color: rgba(16,185,129,0.1); color: #10b981; }
+    .btn-reportar.reportado { background-color: rgba(239,68,68,0.1); color: #ef4444; }
 
-    /* Modal Imagen */
+    /* Modal Imagen - Comparativo Antes/Después */
     .img-modal {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 2000;
     }
     .img-modal.active { display: flex; }
-    .img-modal img { max-width: 90%; max-height: 90%; border-radius: 8px; border: 1px solid #333; }
+    .visor-close {
+        position: absolute; top: 15px; right: 25px; background: none; border: none;
+        color: #fff; font-size: 2.2rem; cursor: pointer; z-index: 2100; line-height: 1;
+    }
+    .visor-close:hover { color: #ef4444; }
+    .compare-container {
+        display: flex; gap: 4px; width: 92%; height: 88%; max-width: 1500px;
+    }
+    .compare-box {
+        flex: 1; position: relative; overflow: hidden; background: #0b0e14;
+        border-radius: 8px; border: 1px solid #2A3143;
+    }
+    .compare-box img {
+        width: 100%; height: 100%; object-fit: contain; cursor: zoom-in;
+        transition: transform 0.12s ease-out; transform: scale(1);
+    }
+    .compare-box:hover img { transform: scale(2.2); }
+    .compare-label {
+        position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.75); color: #fff;
+        padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; z-index: 2;
+        pointer-events: none;
+    }
+    @media (max-width: 768px) {
+        .compare-container { flex-direction: column; height: 92%; }
+    }
 </style>
 
 <!-- Cabecera y Filtros -->
@@ -99,17 +129,17 @@ if (!isset($_SESSION['user_id'])) {
         </select>
 
         <button class="btn-action btn-refresh" onclick="comboBoxLleno = false; cargarEvidencias()" style="background: rgba(0, 255, 135, 0.1); color: #00FF87; border: 1px solid rgba(0, 255, 135, 0.3); padding: 8px 15px; border-radius: 6px; cursor: pointer;">
-            ↻ Actualizar
+            <i class="fas fa-rotate"></i> Actualizar
         </button>
     </div>
 </div>
 
 <!-- TABS (Pestañas de Navegación) -->
 <div class="tabs-container">
-    <button id="tab-cliente" class="tab-btn active" onclick="cambiarVista('cliente')">📊 Vista Cliente (Resumen)</button>
-    
+    <button id="tab-cliente" class="tab-btn active" onclick="cambiarVista('cliente')"><i class="fas fa-chart-simple"></i> Vista Cliente (Resumen)</button>
+
     <?php if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] === 'CALIFICADOR'): ?>
-        <button id="tab-auditoria" class="tab-btn" onclick="cambiarVista('auditoria')">📸 Vista Auditoría (Validación)</button>
+        <button id="tab-auditoria" class="tab-btn" onclick="cambiarVista('auditoria')"><i class="fas fa-camera"></i> Vista Auditoría (Validación)</button>
     <?php endif; ?>
 </div>
 
@@ -122,22 +152,22 @@ if (!isset($_SESSION['user_id'])) {
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 25px;">
         <!-- Card 1: Total Subidas -->
         <div style="background: var(--bg-panel); border: 1px solid var(--brand-border); border-radius: 12px; padding: 20px; border-left: 4px solid #3b82f6;">
-            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">📸 Total Planimetrías (Fotos)</h3>
+            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;"><i class="fas fa-camera" style="color: #3b82f6;"></i> Total Planimetrías (Fotos)</h3>
             <div id="kpi2-totales" style="font-size: 2rem; font-weight: bold; color: #3b82f6;">0</div>
         </div>
         <!-- Card 2: Calificadas Correctas -->
         <div style="background: var(--bg-panel); border: 1px solid var(--brand-border); border-radius: 12px; padding: 20px; border-left: 4px solid #10b981;">
-            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">✅ Calificadas Correctas</h3>
+            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;"><i class="fas fa-circle-check" style="color: #10b981;"></i> Calificadas Correctas</h3>
             <div id="kpi2-correctas" style="font-size: 2rem; font-weight: bold; color: #10b981;">0</div>
         </div>
         <!-- Card 3: % Efectividad -->
         <div style="background: var(--bg-panel); border: 1px solid var(--brand-border); border-radius: 12px; padding: 20px; border-left: 4px solid #8b5cf6;">
-            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">📈 % Aprobación</h3>
+            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;"><i class="fas fa-arrow-trend-up" style="color: #8b5cf6;"></i> % Aprobación</h3>
             <div id="kpi2-pct-buenas" style="font-size: 2rem; font-weight: bold; color: #8b5cf6;">0%</div>
         </div>
         <!-- Card 4: % Rechazadas / Pendientes -->
         <div style="background: var(--bg-panel); border: 1px solid var(--brand-border); border-radius: 12px; padding: 20px; border-left: 4px solid #ef4444;">
-            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">⚠️ % No válidas/Rechazadas</h3>
+            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;"><i class="fas fa-triangle-exclamation" style="color: #ef4444;"></i> % No válidas/Rechazadas</h3>
             <div id="kpi2-pct-malas" style="font-size: 2rem; font-weight: bold; color: #ef4444;">0%</div>
         </div>
     </div>
@@ -162,7 +192,7 @@ if (!isset($_SESSION['user_id'])) {
     </div>
 
     <!-- GALERÍA VISTA CLIENTE (Solo aprobadas) -->
-    <h3 style="color: var(--text-main); margin-bottom: 15px;">📸 Evidencias Calificadas</h3>
+    <h3 style="color: var(--text-main); margin-bottom: 15px;"><i class="fas fa-camera"></i> Evidencias Calificadas</h3>
     <div id="galeria-cliente" class="gallery-grid">
         <!-- Se llena por JS -->
     </div>
@@ -182,9 +212,19 @@ if (!isset($_SESSION['user_id'])) {
 </div>
 <?php endif; ?>
 
-<!-- Modal para ver imagen en grande -->
+<!-- Modal comparativo Antes / Después con zoom automático al pasar el cursor -->
 <div id="visor-img" class="img-modal" onclick="cerrarVisor()">
-    <img id="img-full" src="" alt="Evidencia">
+    <button class="visor-close" onclick="cerrarVisor()">&times;</button>
+    <div class="compare-container" onclick="event.stopPropagation()">
+        <div class="compare-box" id="box-antes">
+            <span class="compare-label">ANTES</span>
+            <img id="img-antes" src="" alt="Antes">
+        </div>
+        <div class="compare-box" id="box-despues">
+            <span class="compare-label">DESPUÉS</span>
+            <img id="img-despues" src="" alt="Después">
+        </div>
+    </div>
 </div>
 
 <script>
@@ -213,6 +253,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const selectMercaderista = document.getElementById('filtro-mercaderista');
     let comboBoxLleno = false;
+
+    // Paginación en lotes para las galerías (evita cargar cientos/miles de imágenes de golpe)
+    const AUDITORIA_LOTE = 150;
+    let auditoriaOffset = 0;
+    const CLIENTE_LOTE = 500;
+    let clienteOffset = 0;
 
     window.cambiarVista = (vista) => {
         document.getElementById('tab-cliente').classList.remove('active');
@@ -350,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const tr = `
                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.02);">
-                    <td style="padding: 15px 10px; color: var(--text-main); font-weight: 500;">👤 ${nombre}</td>
+                    <td style="padding: 15px 10px; color: var(--text-main); font-weight: 500;"><i class="fas fa-user"></i> ${nombre}</td>
                     <td style="padding: 15px 10px; color: var(--text-muted);">${pdvs.size} Locales Totales</td>
                     <td style="padding: 15px 10px; color: var(--text-muted);">
                         <span style="color: ${colorTexto}; font-weight: bold;">${validadas}</span> / ${total} 
@@ -362,129 +408,229 @@ document.addEventListener('DOMContentLoaded', () => {
             tbody.insertAdjacentHTML('beforeend', tr);
         });
 
-        // Pintar Galería del Cliente (SOLO las que están validadas y sin botón)
+        // Pintar Galería del Cliente (SOLO las que están validadas y sin botón), paginada en lotes
         const aprobadas = evidencias.filter(e => e.validado === 1);
-        
+
         if(aprobadas.length === 0) {
             galeriaCliente.innerHTML = '<p style="color: var(--text-muted); padding: 10px;">Aún no hay planimetrías calificadas en este rango.</p>';
         } else {
-            aprobadas.forEach(ev => {
-                const imgError = "this.onerror=null; this.src='assets/img/no-image.png';";
-                const card = `
-                    <div class="evidencia-card">
-                        <div class="card-header">
-                            <div>
-                                <div style="color: var(--text-main); font-weight: bold; font-size: 0.95rem;">${ev.pdv}</div>
-                                <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">👤 ${ev.mercaderista}</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="color: var(--brand-accent); font-size: 0.8rem;">📅 ${ev.fecha_trabajo} | ⏱ ${ev.hora}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="img-container">
-                            <div class="img-box" onclick="abrirVisor('${ev.url_antes}')">
-                                <img src="${ev.url_antes}" onerror="${imgError}" alt="Antes">
-                                <span class="img-label">ANTES</span>
-                            </div>
-                            <div class="img-box" onclick="abrirVisor('${ev.url_despues}')">
-                                <img src="${ev.url_despues}" onerror="${imgError}" alt="Después">
-                                <span class="img-label">DESPUÉS</span>
-                            </div>
-                        </div>
-                        
-                        <div class="card-body">
-                            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                                <span style="background: rgba(14,165,233,0.1); color: #0ea5e9; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">
-                                    ${ev.categoria}
-                                </span>
-                            </div>
-                            <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.4; margin: 0; min-height: 40px;">
-                                "${ev.comentario || 'Sin comentario'}"
-                            </p>
-                        </div>
-                        
-                        <!-- BARRA DE ESTADO SIN ACCIÓN -->
-                        <div style="padding: 10px; text-align: center; background-color: rgba(16,185,129,0.1); color: #10b981; font-weight: bold; border-top: 1px solid var(--brand-border); font-size: 0.85rem;">
-                            ☑ PLANIMETRÍA APROBADA
-                        </div>
+            clienteOffset = 0;
+            renderizarLoteCliente(aprobadas);
+        }
+    };
+
+    const construirCardCliente = (ev) => {
+        const imgError = "this.onerror=null; this.src='assets/img/no-image.png';";
+        return `
+            <div class="evidencia-card">
+                <div class="card-header">
+                    <div>
+                        <div style="color: var(--text-main); font-weight: bold; font-size: 0.95rem;">${ev.pdv}</div>
+                        <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;"><i class="fas fa-user"></i> ${ev.mercaderista}</div>
                     </div>
-                `;
-                galeriaCliente.insertAdjacentHTML('beforeend', card);
-            });
+                    <div style="text-align: right;">
+                        <div style="color: var(--brand-accent); font-size: 0.8rem;"><i class="fas fa-calendar-days"></i> ${ev.fecha_trabajo} | <i class="fas fa-clock"></i> ${ev.hora}</div>
+                    </div>
+                </div>
+
+                <div class="img-container">
+                    <div class="img-box" onclick="abrirVisor('${ev.url_antes}', '${ev.url_despues}')">
+                        <img src="${ev.url_antes}" loading="lazy" onerror="${imgError}" alt="Antes">
+                        <span class="img-label">ANTES</span>
+                    </div>
+                    <div class="img-box" onclick="abrirVisor('${ev.url_antes}', '${ev.url_despues}')">
+                        <img src="${ev.url_despues}" loading="lazy" onerror="${imgError}" alt="Después">
+                        <span class="img-label">DESPUÉS</span>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                        <span style="background: rgba(14,165,233,0.1); color: #0ea5e9; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">
+                            ${ev.categoria}
+                        </span>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.4; margin: 0; min-height: 40px;">
+                        "${ev.comentario || 'Sin comentario'}"
+                    </p>
+                </div>
+
+                <!-- BARRA DE ESTADO SIN ACCIÓN -->
+                <div style="padding: 10px; text-align: center; background-color: rgba(16,185,129,0.1); color: #10b981; font-weight: bold; border-top: 1px solid var(--brand-border); font-size: 0.85rem;">
+                    <i class="fas fa-square-check"></i> PLANIMETRÍA APROBADA
+                </div>
+            </div>
+        `;
+    };
+
+    // Renderiza el siguiente lote de la galería de Vista Cliente y gestiona el botón "Cargar más"
+    const renderizarLoteCliente = (aprobadas) => {
+        const galeriaCliente = document.getElementById('galeria-cliente');
+        if (!galeriaCliente) return;
+
+        const btnPrevio = document.getElementById('btn-cargar-mas-cliente');
+        if (btnPrevio) btnPrevio.remove();
+
+        const lote = aprobadas.slice(clienteOffset, clienteOffset + CLIENTE_LOTE);
+        lote.forEach(ev => {
+            galeriaCliente.insertAdjacentHTML('beforeend', construirCardCliente(ev));
+        });
+        clienteOffset += lote.length;
+
+        if (clienteOffset < aprobadas.length) {
+            const btn = document.createElement('button');
+            btn.id = 'btn-cargar-mas-cliente';
+            btn.type = 'button';
+            btn.style.cssText = 'grid-column: 1 / -1; margin-top: 10px; padding: 12px; background: rgba(139,92,246,0.1); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.3); border-radius: 8px; cursor: pointer; font-weight: bold;';
+            btn.innerHTML = `<i class="fas fa-chevron-down"></i> Cargar más evidencias (${aprobadas.length - clienteOffset} restantes)`;
+            btn.onclick = () => renderizarLoteCliente(aprobadas);
+            galeriaCliente.appendChild(btn);
+        }
+    };
+
+    const construirCardAuditoria = (ev) => {
+        const imgError = "this.onerror=null; this.src='assets/img/no-image.png';";
+        return `
+            <div class="evidencia-card">
+                <div class="card-header">
+                    <div>
+                        <div style="color: var(--text-main); font-weight: bold; font-size: 0.95rem;">${ev.pdv}</div>
+                        <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;"><i class="fas fa-user"></i> ${ev.mercaderista}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: var(--brand-accent); font-size: 0.8rem;"><i class="fas fa-calendar-days"></i> ${ev.fecha_trabajo} | <i class="fas fa-clock"></i> ${ev.hora}</div>
+                    </div>
+                </div>
+
+                <div class="img-container">
+                    <div class="img-box" onclick="abrirVisor('${ev.url_antes}', '${ev.url_despues}')">
+                        <img src="${ev.url_antes}" loading="lazy" onerror="${imgError}" alt="Antes">
+                        <span class="img-label">ANTES</span>
+                    </div>
+                    <div class="img-box" onclick="abrirVisor('${ev.url_antes}', '${ev.url_despues}')">
+                        <img src="${ev.url_despues}" loading="lazy" onerror="${imgError}" alt="Después">
+                        <span class="img-label">DESPUÉS</span>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                        <span style="background: rgba(14,165,233,0.1); color: #0ea5e9; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">
+                            ${ev.categoria}
+                        </span>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.4; margin: 0; min-height: 40px;">
+                        "${ev.comentario || 'Sin comentario'}"
+                    </p>
+                </div>
+
+                <div class="btn-group-auditoria">
+                    <button class="btn-validar ${ev.validado === 1 ? 'aprobado' : ''}" onclick="cambiarEstadoEvidencia(${ev.id_evidencia}, 1, this)">
+                        <i class="${ev.validado === 1 ? 'fas fa-square-check' : 'far fa-square'}"></i>
+                        ${ev.validado === 1 ? 'REVISADO (Aprobado)' : 'MARCAR REVISADO'}
+                    </button>
+                    <button class="btn-reportar ${ev.validado === 2 ? 'reportado' : ''}" onclick="cambiarEstadoEvidencia(${ev.id_evidencia}, 2, this)">
+                        <i class="fas fa-flag"></i>
+                        ${ev.validado === 2 ? 'REPORTADO' : 'Reportar'}
+                    </button>
+                </div>
+            </div>
+        `;
+    };
+
+    // Renderiza el siguiente lote de evidencias de auditoría y gestiona el botón "Cargar más"
+    const renderizarLoteAuditoria = (evidencias) => {
+        const contenedor = document.getElementById('galeria-evidencias');
+        if (!contenedor) return;
+
+        const btnPrevio = document.getElementById('btn-cargar-mas-auditoria');
+        if (btnPrevio) btnPrevio.remove();
+
+        const lote = evidencias.slice(auditoriaOffset, auditoriaOffset + AUDITORIA_LOTE);
+        lote.forEach(ev => {
+            contenedor.insertAdjacentHTML('beforeend', construirCardAuditoria(ev));
+        });
+        auditoriaOffset += lote.length;
+
+        if (auditoriaOffset < evidencias.length) {
+            const btn = document.createElement('button');
+            btn.id = 'btn-cargar-mas-auditoria';
+            btn.type = 'button';
+            btn.style.cssText = 'grid-column: 1 / -1; margin-top: 10px; padding: 12px; background: rgba(139,92,246,0.1); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.3); border-radius: 8px; cursor: pointer; font-weight: bold;';
+            btn.innerHTML = `<i class="fas fa-chevron-down"></i> Cargar más evidencias (${evidencias.length - auditoriaOffset} restantes)`;
+            btn.onclick = () => renderizarLoteAuditoria(evidencias);
+            contenedor.appendChild(btn);
         }
     };
 
     const pintarVistaAuditoria = (evidencias) => {
         const contenedor = document.getElementById('galeria-evidencias');
-        if (!contenedor) return; 
-        
-        contenedor.innerHTML = '';
+        if (!contenedor) return;
 
-        evidencias.forEach(ev => {
-            const imgError = "this.onerror=null; this.src='assets/img/no-image.png';";
-            const card = `
-                <div class="evidencia-card">
-                    <div class="card-header">
-                        <div>
-                            <div style="color: var(--text-main); font-weight: bold; font-size: 0.95rem;">${ev.pdv}</div>
-                            <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">👤 ${ev.mercaderista}</div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="color: var(--brand-accent); font-size: 0.8rem;">📅 ${ev.fecha_trabajo} | ⏱ ${ev.hora}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="img-container">
-                        <div class="img-box" onclick="abrirVisor('${ev.url_antes}')">
-                            <img src="${ev.url_antes}" onerror="${imgError}" alt="Antes">
-                            <span class="img-label">ANTES</span>
-                        </div>
-                        <div class="img-box" onclick="abrirVisor('${ev.url_despues}')">
-                            <img src="${ev.url_despues}" onerror="${imgError}" alt="Después">
-                            <span class="img-label">DESPUÉS</span>
-                        </div>
-                    </div>
-                    
-                    <div class="card-body">
-                        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                            <span style="background: rgba(14,165,233,0.1); color: #0ea5e9; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">
-                                ${ev.categoria}
-                            </span>
-                        </div>
-                        <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.4; margin: 0; min-height: 40px;">
-                            "${ev.comentario || 'Sin comentario'}"
-                        </p>
-                    </div>
-                    
-                    <button class="btn-validar ${ev.validado === 1 ? 'aprobado' : ''}" onclick="toggleValidacion(this, ${ev.id_evidencia})">
-                        ${ev.validado === 1 ? '☑ REVISADO (Aprobado)' : '☐ MARCAR REVISADO'}
-                    </button>
-                </div>
-            `;
-            contenedor.insertAdjacentHTML('beforeend', card);
-        });
+        contenedor.innerHTML = '';
+        auditoriaOffset = 0;
+        renderizarLoteAuditoria(evidencias);
     };
 
-    window.abrirVisor = (url) => {
-        document.getElementById('img-full').src = url;
+    // Zoom automático: la imagen se amplía y sigue la posición del cursor al pasar por encima
+    const setupZoom = (boxId, imgId) => {
+        const box = document.getElementById(boxId);
+        const img = document.getElementById(imgId);
+        box.addEventListener('mousemove', (e) => {
+            const rect = box.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            img.style.transformOrigin = `${x}% ${y}%`;
+        });
+        box.addEventListener('mouseleave', () => {
+            img.style.transformOrigin = 'center center';
+        });
+    };
+    setupZoom('box-antes', 'img-antes');
+    setupZoom('box-despues', 'img-despues');
+
+    window.abrirVisor = (urlAntes, urlDespues) => {
+        document.getElementById('img-antes').src = urlAntes;
+        document.getElementById('img-despues').src = urlDespues;
         document.getElementById('visor-img').classList.add('active');
     };
     window.cerrarVisor = () => {
         document.getElementById('visor-img').classList.remove('active');
-        document.getElementById('img-full').src = '';
+        document.getElementById('img-antes').src = '';
+        document.getElementById('img-despues').src = '';
     };
 
-    window.toggleValidacion = async (btn, idEvidencia) => {
-        const esAprobado = btn.classList.contains('aprobado');
-        const nuevoEstado = esAprobado ? 0 : 1; 
+    // Estados de una evidencia: 0 = pendiente, 1 = revisado/aprobado, 2 = reportado.
+    const pintarBotonesEstado = (btnRevisar, btnReportar, estado) => {
+        btnRevisar.classList.toggle('aprobado', estado === 1);
+        btnRevisar.innerHTML = `<i class="${estado === 1 ? 'fas fa-square-check' : 'far fa-square'}"></i> ${estado === 1 ? 'REVISADO (Aprobado)' : 'MARCAR REVISADO'}`;
+        btnReportar.classList.toggle('reportado', estado === 2);
+        btnReportar.innerHTML = `<i class="fas fa-flag"></i> ${estado === 2 ? 'REPORTADO' : 'Reportar'}`;
+    };
 
-        if (nuevoEstado === 1) {
-            btn.classList.add('aprobado');
-            btn.innerHTML = '☑ REVISADO (Aprobado)';
-        } else {
-            btn.classList.remove('aprobado');
-            btn.innerHTML = '☐ MARCAR REVISADO';
+    window.cambiarEstadoEvidencia = async (idEvidencia, estadoClic, btn) => {
+        const evidencia = dataAuditoria.find(e => e.id_evidencia === idEvidencia);
+        if (!evidencia) return;
+
+        const estadoAnterior = evidencia.validado;
+        const nuevoEstado = (estadoAnterior === estadoClic) ? 0 : estadoClic;
+
+        const card = btn.closest('.evidencia-card');
+        const btnRevisar = card.querySelector('.btn-validar');
+        const btnReportar = card.querySelector('.btn-reportar');
+
+        // Actualización optimista: se ve al instante, sin esperar al servidor
+        evidencia.validado = nuevoEstado;
+        pintarBotonesEstado(btnRevisar, btnReportar, nuevoEstado);
+
+        // La Vista Cliente y las gráficas excluyen las reportadas (estado 2) — se refleja igual, en memoria
+        const indexCli = dataCliente.findIndex(e => e.id_evidencia === idEvidencia);
+        if (nuevoEstado === 2 && indexCli !== -1) {
+            dataCliente.splice(indexCli, 1);
+            pintarVistaCliente(dataCliente);
+        } else if (nuevoEstado !== 2 && indexCli !== -1) {
+            dataCliente[indexCli].validado = nuevoEstado === 1 ? 1 : 0;
+            pintarVistaCliente(dataCliente);
         }
 
         try {
@@ -493,21 +639,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id_evidencia: idEvidencia, validado: nuevoEstado })
             });
-            
-            const indexAud = dataAuditoria.findIndex(e => e.id_evidencia === idEvidencia);
-            if (indexAud !== -1) {
-                dataAuditoria[indexAud].validado = nuevoEstado;
+
+            // Caso puntual: estaba reportada (por eso no estaba en dataCliente) y deja de estarlo.
+            // No tenemos su fila completa de Vista Cliente en memoria, así que la traemos del servidor solo aquí.
+            if (estadoAnterior === 2 && nuevoEstado !== 2 && indexCli === -1) {
+                await cargarEvidencias();
             }
-            
-            const indexCli = dataCliente.findIndex(e => e.id_evidencia === idEvidencia);
-            if (indexCli !== -1) {
-                dataCliente[indexCli].validado = nuevoEstado;
-                pintarVistaCliente(dataCliente);
-            }
-            
         } catch (error) {
-            console.error("Error guardando validación:", error);
-            alert("Hubo un error de conexión al validar. Intente de nuevo.");
+            console.error("Error guardando estado:", error);
+            alert("Hubo un error de conexión al actualizar el estado. Intente de nuevo.");
+            evidencia.validado = estadoAnterior;
+            pintarBotonesEstado(btnRevisar, btnReportar, estadoAnterior);
+            await cargarEvidencias();
         }
     };
 

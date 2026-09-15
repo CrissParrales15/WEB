@@ -18,6 +18,9 @@ if (!isset($_SESSION['user_id'])) {
         opacity: 1;
         cursor: pointer;
     }
+    html[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: none;
+    }
 </style>
 
 <!-- 1. Librerías de Mapa (Leaflet) -->
@@ -31,7 +34,7 @@ if (!isset($_SESSION['user_id'])) {
             KPI 1 - Efectividad de Visita
             <!-- Nuevo botón dinámico para la vista Micro -->
             <button id="btn-puntos-header" class="btn-puntos" style="display: none;">
-                🏆 Ver Puntos Mensuales
+                <i class="fas fa-trophy"></i> Ver Puntos Mensuales
             </button>
         </h2>
         <p style="color: var(--text-muted); font-size: 0.9rem;" id="subtitle-info">Cargando datos...</p>
@@ -59,21 +62,21 @@ if (!isset($_SESSION['user_id'])) {
 <!-- 2. Tarjetas de Resumen (UX Improvement) -->
 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px;">
     <div style="background-color: var(--bg-panel); border: 1px solid var(--brand-border); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 15px;">
-        <div style="width: 50px; height: 50px; border-radius: 50%; background-color: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">📍</div>
+        <div style="width: 50px; height: 50px; border-radius: 50%; background-color: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;"><i class="fas fa-location-dot" style="color: var(--text-main);"></i></div>
         <div>
             <div style="color: var(--text-muted); font-size: 0.85rem; letter-spacing: 1px;">PDVs ASIGNADOS</div>
             <div id="stat-asignados" style="font-size: 1.5rem; font-weight: bold; color: var(--text-main);">0</div>
         </div>
     </div>
     <div style="background-color: var(--bg-panel); border: 1px solid var(--brand-border); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 15px;">
-        <div style="width: 50px; height: 50px; border-radius: 50%; background-color: rgba(16,185,129,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">✅</div>
+        <div style="width: 50px; height: 50px; border-radius: 50%; background-color: rgba(16,185,129,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;"><i class="fas fa-circle-check" style="color: #10b981;"></i></div>
         <div>
             <div style="color: var(--text-muted); font-size: 0.85rem; letter-spacing: 1px;">PDVs VISITADOS</div>
             <div id="stat-visitados" style="font-size: 1.5rem; font-weight: bold; color: #10b981;">0</div>
         </div>
     </div>
     <div style="background-color: var(--bg-panel); border: 1px solid var(--brand-border); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 15px;">
-        <div style="width: 50px; height: 50px; border-radius: 50%; background-color: rgba(14,165,233,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">📊</div>
+        <div style="width: 50px; height: 50px; border-radius: 50%; background-color: rgba(14,165,233,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;"><i class="fas fa-chart-simple" style="color: #0ea5e9;"></i></div>
         <div>
             <div style="color: var(--text-muted); font-size: 0.85rem; letter-spacing: 1px;">EFECTIVIDAD</div>
             <div id="stat-efectividad" style="font-size: 1.5rem; font-weight: bold; color: #0ea5e9;">0%</div>
@@ -88,7 +91,7 @@ if (!isset($_SESSION['user_id'])) {
     <div style="background-color: var(--bg-panel); border: 1px solid var(--brand-border); border-radius: 12px; padding: 20px; height: 450px; display: flex; flex-direction: column;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
             <h3 style="font-size: 1rem; color: var(--text-muted); letter-spacing: 1px;">MAPA DE COBERTURA</h3>
-            <span style="color: var(--brand-accent); font-size: 0.85rem;">● En línea</span>
+            <span style="color: var(--brand-accent); font-size: 0.85rem;"><i class="fas fa-circle" style="font-size: 0.6rem;"></i> En línea</span>
         </div>
         <!-- Contenedor real del mapa -->
         <div id="map" style="flex: 1; border-radius: 8px; z-index: 1;"></div>
@@ -179,14 +182,30 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let comboBoxLleno = false; 
 
-    // --- CONFIGURACIÓN DEL MAPA ---
+    // --- CONFIGURACIÓN DEL MAPA (tile claro/oscuro según el tema activo) ---
     const map = L.map('map').setView([-1.8312, -78.1834], 6);
-    
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=cb1_2qfb_1_86eaf644dec98677db686f90', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
-        subdomains: 'abcd',
-        maxZoom: 19
-    }).addTo(map);
+
+    const tileUrlOscuro = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=cb1_2qfb_1_86eaf644dec98677db686f90';
+    const tileUrlClaro = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=cb1_2qfb_1_86eaf644dec98677db686f90';
+
+    let capaTiles = L.tileLayer(
+        document.documentElement.getAttribute('data-theme') === 'light' ? tileUrlClaro : tileUrlOscuro,
+        {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }
+    ).addTo(map);
+
+    // Si el usuario cambia de tema, recargamos el tile del mapa acorde
+    window.addEventListener('pinguino-theme-changed', (e) => {
+        map.removeLayer(capaTiles);
+        capaTiles = L.tileLayer(e.detail.theme === 'light' ? tileUrlClaro : tileUrlOscuro, {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+    });
 
     let mapMarkers = []; 
 
@@ -302,10 +321,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td style="padding: 12px 5px; color: var(--text-muted);">${fila.col3}</td>
                         <td style="padding: 12px 5px; color: var(--text-main); font-weight: bold;">${fila.col5}</td>
                         <td style="padding: 12px 5px; color: ${colorEstado};">
-                            ${fila.estado === 'OK' ? '⊙ OK' : '⊗ Alerta'}
+                            ${fila.estado === 'OK' ? '<i class="fas fa-circle-check"></i> OK' : '<i class="fas fa-circle-xmark"></i> Alerta'}
                         </td>
                         <td style="padding: 12px 5px; text-align: center;">
-                            <button class="btn-puntos" onclick="abrirModalPuntos('${fila.id_mercaderista}', '${fila.col1}')">🏆 Ver Puntos</button>
+                            <button class="btn-puntos" onclick="abrirModalPuntos('${fila.id_mercaderista}', '${fila.col1}')"><i class="fas fa-trophy"></i> Ver Puntos</button>
                         </td>
                     </tr>
                 `;
@@ -320,7 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td style="padding: 12px 5px; color: var(--text-muted);">${fila.col4}</td>
                         <td style="padding: 12px 5px; color: var(--text-main); font-weight: bold;">${fila.col5}</td>
                         <td style="padding: 12px 5px; color: ${colorEstado};">
-                            ${fila.estado === 'OK' ? '⊙ OK' : (fila.estado === 'Excedido' ? '⚠' : '⊗ Error')}
+                            ${fila.estado === 'OK' ? '<i class="fas fa-circle-check"></i> OK' : (fila.estado === 'Excedido' ? '<i class="fas fa-triangle-exclamation"></i>' : '<i class="fas fa-circle-xmark"></i> Error')}
                         </td>
                     </tr>
                 `;

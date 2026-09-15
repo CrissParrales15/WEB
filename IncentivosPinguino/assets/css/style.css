@@ -9,10 +9,25 @@
     /* Colores temporales para los KPIs (basado en tu mockup) */
     --brand-accent: #10b981;  /* Verde esmeralda para activos */
     --brand-border: rgba(255, 255, 255, 0.1);
+
+    /* Colores de marca por KPI (compartidos en toda la app) */
+    --kpi1-color: #00FF87;
+    --kpi2-color: #00A3FF;
+    --kpi3-color: #B958FF;
     
     --sidebar-width: 260px;
     --sidebar-collapsed-width: 70px;
     --topbar-height: 64px;
+}
+
+/* Tema claro (activado con [data-theme="light"] en <html>). El oscuro sigue siendo el valor por defecto. */
+html[data-theme="light"] {
+    --bg-dark: #f3f4f6;
+    --bg-panel: #ffffff;
+    --bg-hover: #e5e7eb;
+    --text-main: #111827;
+    --text-muted: #6b7280;
+    --brand-border: rgba(0, 0, 0, 0.1);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -24,7 +39,18 @@ body {
     display: flex;
     height: 100vh;
     overflow: hidden;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
+
+/* --- BOTÓN DE TEMA (claro/oscuro) --- */
+.theme-toggle {
+    background: none; border: 1px solid var(--brand-border);
+    color: var(--text-muted); cursor: pointer;
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; transition: all 0.2s; flex-shrink: 0;
+}
+.theme-toggle:hover { color: var(--text-main); background-color: var(--bg-hover); }
 
 /* --- SIDEBAR --- */
 .sidebar {
@@ -102,7 +128,7 @@ body {
     background-color: var(--brand-accent);
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-weight: bold; color: var(--bg-dark);
+    font-weight: bold; color: #ffffff;
 }
 
 /* --- MAIN CONTENEDOR --- */

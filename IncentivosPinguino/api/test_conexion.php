@@ -7,6 +7,7 @@ header('Content-Type: application/json; charset=utf-8');
 
 // 2. Importar la clase DataSource
 // Subimos un nivel en los directorios (..) para entrar a core/
+require_once '../core/ApiAuth.php';
 require_once '../core/DataSource.php';
 
 use Phppot\DataSource;

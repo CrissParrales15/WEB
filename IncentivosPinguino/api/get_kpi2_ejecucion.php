@@ -2,12 +2,13 @@
 header('Content-Type: application/json; charset=utf-8');
 date_default_timezone_set('America/Guayaquil');
 
+require_once '../core/ApiAuth.php';
 require_once '../core/DataSource.php';
 use Phppot\DataSource;
 
 try {
     $db = new DataSource();
-    
+
     // Filtros por Rango
     $desde = isset($_GET['desde']) ? $_GET['desde'] : date('Y-m-01');
     $hasta = isset($_GET['hasta']) ? $_GET['hasta'] : date('Y-m-d');
@@ -53,8 +54,9 @@ try {
     JOIN repositorio_usuario u ON (TRIM(UPPER(e.usuario)) = TRIM(UPPER(u.user)) OR TRIM(UPPER(e.usuario)) = TRIM(UPPER(u.mercaderista)))
     WHERE STR_TO_DATE(e.fecha, '%d/%m/%Y') BETWEEN ? AND ?
       AND UPPER(e.usuario) NOT LIKE '%PRUEBA%'
-      AND u.status = 1 
+      AND u.status = 1
       AND UPPER(u.mercaderista) NOT LIKE '%PRUEBA%'
+      AND (e.validado IS NULL OR e.validado <> 2)
 ";
 
 // Parámetros y filtros
@@ -97,7 +99,7 @@ $data_cliente = $db->select($sql_cliente, $tipos_cli, $params_cli) ?: [];
             e.foto_despues,
             MAX(e.hora) AS hora,
             MAX(e.fecha) AS fecha_trabajo,
-            SUM(CASE WHEN e.validado = 1 THEN 1 ELSE 0 END) AS validadas_evidencias
+            MAX(e.validado) AS estado_validado
         FROM insert_evidencias e
         LEFT JOIN repositorio_locales_dtt2 p ON e.codigo = p.pos_id
         JOIN repositorio_usuario u ON (TRIM(UPPER(e.usuario)) = TRIM(UPPER(u.user)) OR TRIM(UPPER(e.usuario)) = TRIM(UPPER(u.mercaderista)))
@@ -150,7 +152,7 @@ $data_cliente = $db->select($sql_cliente, $tipos_cli, $params_cli) ?: [];
             'fecha_trabajo' => $row['fecha_trabajo'],
             'url_antes' => $url_base_img . $row['foto_antes'],
             'url_despues' => $url_base_img . $row['foto_despues'],
-            'validado' => ($row['validadas_evidencias'] == 1) ? 1 : 0
+            'validado' => isset($row['estado_validado']) ? (int)$row['estado_validado'] : 0
         ];
     }
 

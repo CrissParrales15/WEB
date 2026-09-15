@@ -4,6 +4,7 @@ ini_set('display_errors', 0);
 header('Content-Type: application/json; charset=utf-8');
 date_default_timezone_set('America/Guayaquil');
 
+require_once '../core/ApiAuth.php';
 require_once '../core/DataSource.php';
 $db = new \Phppot\DataSource();
 
@@ -119,8 +120,9 @@ try {
     JOIN repositorio_usuario u ON (TRIM(UPPER(e.usuario)) = TRIM(UPPER(u.user)) OR TRIM(UPPER(e.usuario)) = TRIM(UPPER(u.mercaderista)))
     WHERE STR_TO_DATE(e.fecha, '%d/%m/%Y') BETWEEN ? AND ?
       AND UPPER(e.usuario) NOT LIKE '%PRUEBA%'
-      AND u.status = 1 
+      AND u.status = 1
       AND UPPER(u.mercaderista) NOT LIKE '%PRUEBA%'
+      AND (e.validado IS NULL OR e.validado <> 2)
 ";
 
 $params_kpi2 = [$desde, $hasta];

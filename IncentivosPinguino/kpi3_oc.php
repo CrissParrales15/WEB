@@ -6,10 +6,12 @@
     ========================================== */
     .kpi-cards-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-bottom: 25px; }
     .kpi-card {
-        background: linear-gradient(145deg, var(--bg-panel) 0%, rgba(0,0,0,0.3) 100%);
+        --card-gradient-end: rgba(0,0,0,0.3);
+        background: linear-gradient(145deg, var(--bg-panel) 0%, var(--card-gradient-end) 100%);
         border: 1px solid var(--brand-border); border-radius: 12px; padding: 15px 20px;
         position: relative; overflow: hidden;
     }
+    html[data-theme="light"] .kpi-card { --card-gradient-end: rgba(0,0,0,0.04); }
     .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background-color: var(--brand-accent); }
     .kpi-card.success::before { background-color: #10b981; }
     .kpi-card.warning::before { background-color: #f59e0b; }
@@ -47,25 +49,28 @@
     /* ==========================================
        4. SCROLL PREMIUM PARA TABLAS
     ========================================== */
-    .table-scroll { max-height: 400px; overflow-y: auto; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05); }
-    .table-scroll th { position: sticky; top: 0; background-color: #1a1a1a; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+    .table-scroll { max-height: 400px; overflow-y: auto; border-radius: 8px; border: 1px solid var(--brand-border); }
+    .table-scroll th { position: sticky; top: 0; background-color: var(--bg-panel); z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
     .table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-    .table-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
-    .table-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
+    .table-scroll::-webkit-scrollbar-track { background: rgba(128, 128, 128, 0.1); }
+    .table-scroll::-webkit-scrollbar-thumb { background: rgba(128, 128, 128, 0.35); border-radius: 10px; }
 
 
     /* MODAL STYLES */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; }
-    .modal-content { background: #13141b; border: 1px solid #2d2e3a; border-radius: 12px; width: 90%; max-width: 600px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 20px; }
-    .btn-close-modal { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
+    .modal-content { background: var(--bg-panel); border: 1px solid var(--brand-border); border-radius: 12px; width: 90%; max-width: 600px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--brand-border); padding-bottom: 15px; margin-bottom: 20px; }
+    .btn-close-modal { background: none; border: none; color: var(--text-main); font-size: 1.5rem; cursor: pointer; }
     .btn-ver-puntos { background: rgba(139, 92, 246, 0.15); border: 1px solid #8b5cf6; color: #c4b5fd; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-    .btn-ver-puntos:hover { background: #8b5cf6; color: #fff; } 
+    .btn-ver-puntos:hover { background: #8b5cf6; color: #fff; }
 
     input[type="date"].search-bar::-webkit-calendar-picker-indicator {
         filter: invert(1);
         opacity: 1;
         cursor: pointer;
+    }
+    html[data-theme="light"] input[type="date"].search-bar::-webkit-calendar-picker-indicator {
+        filter: none;
     }
 </style>
 
@@ -92,7 +97,7 @@
         </select>
         
         <button class="btn-action btn-refresh" onclick="comboBoxLleno = false; cargarOrdenes()" style="background: rgba(0, 255, 135, 0.1); color: #00FF87; border: 1px solid rgba(0, 255, 135, 0.3); padding: 8px 15px; border-radius: 6px; cursor: pointer;">
-            ↻ Actualizar
+            <i class="fas fa-rotate"></i> Actualizar
         </button>
     </div>
 </div>
@@ -140,11 +145,11 @@
 
 <div class="ranking-card">
     <div class="dashboard-header-flex">
-        <h3 class="ranking-title">🎯 Rendimiento por Mercaderista (En rango de fechas)</h3>
+        <h3 class="ranking-title"><i class="fas fa-bullseye"></i> Rendimiento por Mercaderista (En rango de fechas)</h3>
         <div class="filter-tabs">
             <button class="tab-btn active" onclick="filtrarTabla('all')">Todos</button>
-            <button class="tab-btn" onclick="filtrarTabla('ganadores')">🏆 Ganadores</button>
-            <button class="tab-btn" onclick="filtrarTabla('riesgo')">⚠️ En Riesgo</button>
+            <button class="tab-btn" onclick="filtrarTabla('ganadores')"><i class="fas fa-trophy"></i> Ganadores</button>
+            <button class="tab-btn" onclick="filtrarTabla('riesgo')"><i class="fas fa-triangle-exclamation"></i> En Riesgo</button>
         </div>
     </div>
     
@@ -170,7 +175,7 @@
 
 <div class="ranking-card">
     <div class="dashboard-header-flex">
-        <h3 class="ranking-title">📋 Registro de Campo Diario (Operación del rango seleccionado)</h3>
+        <h3 class="ranking-title"><i class="fas fa-clipboard-list"></i> Registro de Campo Diario (Operación del rango seleccionado)</h3>
     </div>
     <div class="table-scroll" style="max-height: 300px;">
         <table style="width: 100%; text-align: left; border-collapse: collapse; font-size: 0.85rem;">
@@ -193,7 +198,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <div>
-                <h3 id="modal-nombre" style="color: #fff; margin:0;">Mercaderista</h3>
+                <h3 id="modal-nombre" style="color: var(--text-main); margin:0;">Mercaderista</h3>
                 <p style="color: #a1a1aa; font-size: 0.8rem; margin: 5px 0 0 0;">Progreso Mensual KPI 3 (Órdenes TIA)</p>
             </div>
             <button class="btn-close-modal" onclick="cerrarModal()">×</button>
@@ -342,14 +347,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const ganoPuntos = porcentaje >= 70;
             const badge = ganoPuntos 
-                ? '<span class="badge badge-success">✅ Cumple Meta</span>' 
-                : `<span class="badge badge-warning">⚠️ En riesgo</span>`;
+                ? '<span class="badge badge-success"><i class="fas fa-circle-check"></i> Cumple Meta</span>'
+                : `<span class="badge badge-warning"><i class="fas fa-triangle-exclamation"></i> En riesgo</span>`;
 
- 
+
             const tr = `
                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.02);">
-                    <td style="padding: 15px 10px; color: var(--text-main); font-weight: 500;"> 
-                        👤 ${data.mercaderista}
+                    <td style="padding: 15px 10px; color: var(--text-main); font-weight: 500;">
+                        <i class="fas fa-user"></i> ${data.mercaderista}
                     </td>
                     <td style="padding: 15px 10px; text-align: center; color: var(--text-muted); font-size: 1.1rem;">${data.meta_pdvs}</td>
                     <td style="padding: 15px 10px; text-align: center; color: var(--brand-accent); font-weight: bold; font-size: 1.1rem;">${data.pdvs_exitosos}</td>
@@ -372,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </td>
                     <td style="padding: 15px 10px; text-align: center; display:none;">
                         <div style="margin-bottom: 8px;">${badge}</div>
-                        <button class="btn-ver-puntos" onclick="abrirModalPuntos(${data.id_usuario}, '${data.mercaderista}')">🏆 Ver Detalle Días</button>
+                        <button class="btn-ver-puntos" onclick="abrirModalPuntos(${data.id_usuario}, '${data.mercaderista}')"><i class="fas fa-trophy"></i> Ver Detalle Días</button>
                     </td>
                 </tr>
             `;
@@ -442,7 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const esExitoso = oc.existe_orden === 'SI';
             const colorOrden = esExitoso ? '#10b981' : 'var(--text-muted)';
             const bgBadge = esExitoso ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)';
-            const icon = esExitoso ? '✅' : '➖';
+            const icon = esExitoso ? '<i class="fas fa-circle-check"></i>' : '<i class="fas fa-circle-minus"></i>';
 
             const tr = `
                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.02); opacity: ${esExitoso ? '1' : '0.5'}; transition: background 0.2s;">
